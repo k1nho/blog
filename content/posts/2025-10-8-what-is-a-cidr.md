@@ -47,7 +47,7 @@ In the above example, we have 24 bits for the network identifier, and the remain
 ```mermaid
 block
 columns 1
-  cidr["CIDR Example (1,048,576 IP Addresses)<br> 192.168.1.0/12"]
+  cidr["CIDR Example (16,777,216 IP Addresses)<br> 192.168.1.0/12"]
   block:CIDRparts
         network["Network bits<br>192"]
         host["Host bits<br>168.1.0"]

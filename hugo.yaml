@@ -74,8 +74,8 @@ params:
       show: false
 
   logo:
-    image: "/images/logokin.png" # Relative path in static directory
-    link: "/"
+    image: "/blog/images/logokin.png" # Relative path in static directory
+    link: "/blog/"
 
   favicon:
     svg: "logokin.ico"
