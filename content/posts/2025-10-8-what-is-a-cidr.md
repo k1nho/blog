@@ -9,9 +9,9 @@ mermaid: true
 
 If you are perusing through some DevOps articles or documentation, chances are you might have encountered the acronym **CIDR**, but what the heck is it? and why is it a fundamental concept in modern-day networking?
 
-An IP address consists of a **network address** and a **host address**. Before CIDR existed, IP address allocation was based on a classful system such as Class A (8 network prefix bits), Class B (16 network prefix bits), and Class C (24 network prefix bits).
+An IP address consists of a **network address** and a **host address**. Before CIDR existed, IP address allocation was based on a classful system[^1] such as Class A (8 network prefix bits), Class B (16 network prefix bits), and Class C (24 network prefix bits).
 
-The fixed nature of the classful system[^1] led to ==IP address waste==. For example, for a network with 500 devices, a Class C IP address would only cover up to 256 (2^8), which meant that an upgrade to Class B would be the next move.
+The fixed nature of the classful system led to ==IP address waste==. For example, for a network with 500 devices, a Class C IP address would only cover up to 256 (2^8), which meant that an upgrade to Class B would be the next move.
 However, this led to the waste of 65,036 IP addresses, as only 500 were needed. Wouldn’t it be nice in this case to provision fewer IP addresses to reduce the waste?
 
 Enter the ==Classless Inter Domain Routing==, or CIDR for short. The CIDR represents a contiguous block of IP addresses, and has the format of an IP Address followed by a suffix number like so.
