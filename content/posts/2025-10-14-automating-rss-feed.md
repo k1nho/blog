@@ -9,14 +9,14 @@ draft: true
 mermaid: true
 ---
 
-After finally updating my blog to be a standalone site, I decided to start writing more about the different concepts I learn and the projects I build along the way, as a way to form a more concrete **note-making system**[^1]. A while back, I had set up a GitHub Action to scrape both [dev.to](https://dev.to/) and [medium.com](https://medium.com/), the platforms where I previously hosted the few articles I had written back in the day.
+After finally updating my blog to be a standalone site, I decided to start writing more about the different concepts I learn and the projects I build along the way, in order to form a more concrete **note-making system**[^1]. A while back, I had set up a GitHub Action to scrape both [dev.to](https://dev.to/) and [medium.com](https://medium.com/), the platforms where I previously hosted the few articles I had written back in the day.
 
 However, after setting up my blog with the cool [hugo-narrow](https://github.com/tom2almighty/hugo-narrow) theme and enabling the RSS feed, it was finally time to migrate from that action to a custom one. This new action objective is to fetch my personal RSS feed and periodically updates the README.md on
 my GitHub profile with the five most recent articles. Here is to hoping I write a lot more by the end of the year 😁!
 
-I chose to use Dagger to automate this process. Dagger, created by the team behind Docker, solves a huge pain point in the CI ecosystem: the overwhelming amount of YAML slop required to run a workflow.
+I chose to use [Dagger](https://dagger.io) to automate this process. Dagger, created by the team behind Docker, solves a huge pain point in the CI ecosystem: the overwhelming amount of YAML slop required to run a workflow.
 What I found cool about Dagger is that, similar to how Infrastructure as Code (IaC) works, we can write our CI as code. This gives us a lot of versatility in crafting our software workflows. For example, we can build a
-test container with the libraries and dependencies we need, and reuse it to run different sets of tests for multiple projects.
+test container with the libraries and dependencies we need, and reuse it to run different sets of tests for multiple services.
 
 ```mermaid
 flowchart TB
@@ -183,7 +183,7 @@ ctr := dag.Container().From("alpine/git").
 ```
 
 In line 8, we check if there is a diff compared to the previous README.md. If there is, we commit the change. Lastly, we call the `ExitCode()` method. This step is crucial because, up until the last Git instruction,
-we have been doing deferred evaluation. Calling `ExitCode()` executes the pipeline. Alternatively, `Stdout()` can also be used.
+we have been doing deferred evaluation, so in order to execute the pipeline we need to call `ExitCode()` to run all the operations. Alternatively, `Stdout()` can also be used.
 
 1. [x] Format the RSS Feed content for the new README
 2. [x] Mount our repository into a container
