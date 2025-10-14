@@ -64,6 +64,8 @@ Your objectives may include acquiring new skills, getting involved in exciting p
 
 Regardless of your specific goals, I firmly believe that engaging in Open Source can bring invaluable benefits to your skills, and I hope that this article has provided valuable insights to help you start your journey into OSS.
 
+![Never Give Up](never_give_up.gif)
+
 # Resources:
 
 - Get started with OSS here: [Open Sauced Intro to OSS Course](https://opensauced.pizza/learn/intro-to-oss)
