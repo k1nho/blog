@@ -12,6 +12,8 @@ and enhance community interaction by engaging in OSS for 100 days. As a particip
 
 # Open Source is Scary
 
+![Courage Typing](courage_type.gif)
+
 From an outsider's perspective, getting involved in open source software can seem intimidating. This feeling can be attributed to various factors, but the most common ones I've seen and personally experienced
 are **fear of the unknown**, **mastering technologies**, and **receiving feedback**. Let's break down each of these challenges.
 
@@ -19,6 +21,8 @@ are **fear of the unknown**, **mastering technologies**, and **receiving feedbac
 
 It's no secret that when you first dive into a new repository, you won't know everything about it. It might cover a specific software area you are unfamiliar with, or it might introduce you to concepts you've never encountered.
 This fear of the unknown can be paralyzing, leading to a point where some may give up without even trying.
+
+![Shin Chan Question](shin_chan_question.gif "exploring a CNCF codebase be like")
 
 Recognizing the dynamic nature of software is the first step in accepting the presence of inherent unknowns. The key is not to let fear hold you back.
 Begin by exploring the codebase in small steps, such as reading the documentation or running the project locally. If you encounter a part of the codebase that seems puzzling,
@@ -50,6 +54,8 @@ Lack of complete mastery of a particular technology should not deter you from co
 Last but certainly not least is the challenge of receiving feedback. If it's not a lack of skills or fear of the unknown that hinders contributors, what could it be? OSS is inherently collaborative,
 and effective communication is crucial. After you tackle an issue and submit a pull request, you'll likely receive feedback from the maintainer and reviewers.
 While some contributors may interpret feedback as a sign of their contributions being inadequate, this is often not the case.
+
+![Chansey Reading](chansey_reading.gif "nit: racecar should be racecar")
 
 OSS projects adhere to certain standards, and it's the maintainer's responsibility to ensure that contributions benefit the project, its users, and future contributors. Receiving feedback provides you with an opportunity to improve
 your coding skills and communication. In some instances, however, you may encounter less-friendly maintainers, and it's essential to recognize when it is better to move on.
