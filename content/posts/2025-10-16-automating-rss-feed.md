@@ -1,6 +1,6 @@
 ---
 title: "Automating my RSS Feed with Dagger"
-pubDate: 2025-10-14
+pubDate: 2025-10-16
 Description: "Its time to automate my RSS Feed scrapping with Go and Dagger"
 Categories: ["DevOps", "Go"]
 Tags: ["DevOps", "Go", "Dagger", "Automation"]
