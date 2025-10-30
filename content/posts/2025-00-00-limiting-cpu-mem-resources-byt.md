@@ -65,3 +65,9 @@ systemd-run -u eatmem --slice=eatmem.slice ~/spin_loop.py
 ```
 
 If we add more processes, then the cumulative CPU and Memory usage of those will be limited to the ones defined in our configuration.
+
+**Cgroups** underpins one of the most, if not the most, powerful and important technology in containerization. The management of `cgroupfs` via **systemd** explained is yet another
+lower abstraction, albeit important to understand, as container managers such as [Containerd](https://containerd.io/) leverage **systemd** a cgroup **driver**
+to control container resource usage allowing a system to be protected against hungry processes and distribute compute fairly.
+
+Did you know about **Cgroups**?
