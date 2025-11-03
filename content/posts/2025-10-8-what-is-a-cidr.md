@@ -1,5 +1,5 @@
 ---
-title: "What is CIDR?"
+title: "Byte Size Series - What is CIDR?"
 pubDate: 2025-10-08
 Categories: ["Networking", "DevOps", "Platform Engineering", "Byte Wisdom"]
 Tags: ["Byte Wisdom", "Networking", "DevOps", "Learning"]
