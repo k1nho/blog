@@ -1,7 +1,7 @@
 ---
 title: "Byte Size Series - Limiting CPU and Memory usage with Cgroups"
-pubDate: 2025-10-08
-Categories: ["DevOps", "Platform Engineering", "Byte Wisdom"]
+pubDate: 2025-11-03
+Categories: ["Linux", "DevOps", "Platform Engineering", "Byte Wisdom"]
 Tags: ["Byte Wisdom", "Cgroups", "Linux", "DevOps", "Learning"]
 cover: "bss_cgroups_cover.png"
 mermaid: true
