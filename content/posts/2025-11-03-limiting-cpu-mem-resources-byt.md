@@ -1,6 +1,7 @@
 ---
-title: "Byte Size Series - Limiting CPU and Memory usage with Cgroups"
+title: "Byte Size Series - Limiting CPU and Memory Usage with Cgroups"
 pubDate: 2025-11-03
+Description: "Kubernetes enables the user to set limits for resources such as CPU and memory, but how is the sausage made? In this byte size series entry we go over the fundamental concept of Cgroups!"
 Categories: ["Linux", "DevOps", "Platform Engineering", "Byte Wisdom"]
 Tags: ["Byte Wisdom", "Cgroups", "Linux", "DevOps", "Learning"]
 cover: "bss_cgroups_cover.png"
@@ -11,7 +12,7 @@ The rise of containers and their adoption across the industry with technologies 
 Beneath these abstractions lies the fundamental idea that allows us to start a Linux process while **limiting its CPU and memory resources** using [**Control Groups**](https://man7.org/linux/man-pages/man7/cgroups.7.html), also know as **Cgroups**. In this entry of the byte size series, we'll explore how we can use [systemd](https://systemd.io/),
 one of the most used init systems in many Linux distros, to configure and add a process to a Cgroup.
 
-# What is a Cgroup
+# What is a Cgroup ?
 
 From the [man pages](https://man7.org/linux/man-pages/man7/cgroups.7.html), we get the following:
 
@@ -32,47 +33,82 @@ In fact, **systemd** performs operations under the `pseudo-filesystem` as if you
 
 # Adding a Process to a Cgroup with Systemd (Transient Setup)
 
-To demonstrate Cgroups, we will use `spin_loop.py` this is a simple program that spins forever adding more memory on each iteration.
+To demonstrate Cgroups, we will use `spin_loop.py` this is a simple program that loops forever adding more memory on each iteration.
 
 ```python {filename="spin_loop.py"}
 data = []
-while true:
-    data.append([0] * 10**6)
+while True:
+    data.append([0] * 100)
 ```
 
-Let us know add a this process to a Cgroup via `systemd-run`
+Let us now add this process to a Cgroup via `systemd-run`
 
 ```bash
-systemd-run -u eatmem -p CPUQuota=20% -p MemoryMax=100M ~/spin_loop.py
+systemd-run -u eatmem -p CPUQuota=20% -p MemoryMax=1G python ~/spin_loop.py
 ```
 
 In the command above:
 
 - We create a **systemd unit** called eatmem.
-- We set the **CPU quota to 20% and max memory usage to 100 MB**.
-- Finally, we specify that we want to add the **spin_loop.py** process to add to the Cgroup.
+- We set the **CPU quota to 20% and max memory usage to 1 GB**.
+- Finally, we specify that we want to add the **spin_loop.py** process to the Cgroup.
 
-Whenever the program exceeds these limits (as it will in this example by consuming memory indefinitely), the **out-of-memory killer** is triggered. Just like that, we have prevented the process from going wild. Very cool!
+Whenever the program exceeds these limits (as it will in this example by consuming memory indefinitely), the **out-of-memory killer** is triggered. By running the following command, we can confirm the status of our unit:
+
+```bash
+systemd status eatmem.service
+```
+
+```plaintext
+Loaded: loaded (/run/systemd/transient/eatmem.service; transient)
+Transient: yes
+Active: failed (Result: oom-kill)
+...
+```
+
+<details>
+<summary>Garbage collecting the unit</summary>
+
+By default, **systemd does not cleanup the transient unit**, so if you run the command once again you will see.
+
+> [!CAUTION] Error
+> Failed to start transient service unit: **Unit eatmem.service was already loaded or has a fragment file.**
+
+This default behavior is what enables us to inspect logs, and status afterwards. If you would like to manually cleanup the unit, you can run:
+
+```bash
+sudo systemctl reset-failed eatmem.service
+```
+
+If you would like systemd to automatically **garbage-collect** the transient unit, run the command with the `--collect` flag:
+
+```bash
+systemd-run --collect -u eatmem -p CPUQuota=20% -p MemoryMax=1G python ~/spin_loop.py
+```
+
+</details>
+
+Just like that, we have prevented the process from going wild. Very cool!
 
 # Configuring a Cgroup (Persistent Setup)
 
 There is one more thing, if we ever wanted to save this configuration, that is a Cgroup that monitors and limits the CPU quota and memory max to those that we specify, we would need to define a `slice`
-as otherwise the cgroup would be tied to the process that was invoked in it. We can achieve that with the following.
+as otherwise the Cgroup would be tied to the process that was invoked in it. We can achieve that with the following.
 
 ```plaintext {filename="sliceconfig"}
 [Slice]
 CPUQuota=20%
-MemoryMax=100M
+MemoryMax=1G
 ```
 
 ```bash
-cat sliceconfig > /etc/systemd/system/eatmem.slice
+sudo cp sliceconfig /etc/systemd/system/eatmem.slice
 ```
 
 Now we can place any process into our `eatmem.slice` as we did before.
 
 ```bash
-systemd-run -u eatmem --slice=eatmem.slice ~/spin_loop.py
+systemd-run -u eatmem --slice=eatmem.slice python ~/spin_loop.py
 ```
 
 If we add more processes, their **cumulative CPU and memory usage** will be limited according to our slice configuration.
