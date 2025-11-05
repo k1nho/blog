@@ -10,7 +10,7 @@ draft: true
 ---
 
 This year I want to really up my **DevOps** skills to the next level, as it is an area I am very interested in. After having such a great experience diving into **Kubernetes** services for the fantastic [NSDF Intersect](https://nationalsciencedatafabric.org/nsdf-intersect) project,
-I decided that it is time to finally go full throttle into building my own **mini homelab**.
+I decided that it is time to finally go full throttle into building my own **mini homelab** playground.
 
 Usually, when people think of a homelab, they picture a **huge server rack** with boxes upon boxes upon boxes... and, of course, a money tree 😁. However, If you are like me, chances are you want
 to build a **test lab**, one that can serve you to experiment different technologies.
@@ -89,7 +89,7 @@ Configuring for IPV6 as well.
 sudo ufw allow from 'fda7:115c:a1e0::/48' to any port 22
 ```
 
-Lastly, we deny access from any other IP to SSH.
+We deny access from any other IP to SSH.
 
 ```bash
 sudo ufw deny 22
