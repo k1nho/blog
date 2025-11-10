@@ -125,12 +125,24 @@ menus:
       params:
         icon: archive
 
+    - name: nav.about
+      pageRef: /about
+      weight: 60
+      params:
+        icon: about
+
   footer:
     - name: RSS Feed
       url: /index.xml
       weight: 30
       params:
         icon: rss
+
+    - name: About
+      pageRef: /about
+      weight: 10
+      params:
+        icon: about
 
   social:
     - name: GitHub
