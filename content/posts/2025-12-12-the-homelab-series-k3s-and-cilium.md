@@ -1,5 +1,5 @@
 ---
-title: "Kinho's Homelab Series - Orchestration Platform and Networking (K3s and Cilium)"
+title: "Kinho's Homelab Series - Orchestration Platform and Networking (K3s + Cilium)"
 pubDate: 2025-12-12
 Description: "Let's build a mini homelab! In this entry, I install Kubernetes and do a few modifications to introduce Cilium for networking, observability and security"
 Categories: ["DevOps", "Networking", "Platform Engineering"]
@@ -18,6 +18,8 @@ the way I'll discuss a few lessons learned.
 ---
 
 # Deciding on a Kubernetes Distro
+
+![k3s logo](k3s_logo.png)
 
 Rolling your own Kubernetes on-prem usually can be done in a multiple ways. You could go for [Kubernetes the hard way](https://github.com/kelseyhightower/kubernetes-the-hard-way) if you really want to understand
 the guts of Kubernetes installing each component to create the control plane such as **container runtime**, **etcd** distributed key-value database, **api server**, **controller manager**, **scheduler**, **kubelet** and so on.
@@ -97,6 +99,8 @@ get practical about why we want to configure **Cilium** in our k3s cluster.
 
 # Unifying the Cluster's Network Stack with Cilium
 
+![Cilium logo](cilium_logo.png)
+
 From the [official website](https://cilium.io/), we get the following definition:
 
 > Cilium is an open source, cloud native solution for providing, securing, and observing network connectivity between workloads, fueled by the revolutionary Kernel technology eBPF
@@ -106,6 +110,8 @@ All of those components map to a specific [layer](https://www.cloudflare.com/lea
 Enter **Cilium**, we will use it to unify our networking stack, that is, as our **CNI plugin** for pod networking, L4 service routing, and L7 load balancer for setting up Gateway API/ingress.
 
 ## How can Cilium Achieve all of that ?
+
+![eBPF logo](ebpf_logo.png)
 
 Cilium is based on [eBPF](https://ebpf.io/) which can **dynamically program the kernel**. This enables a more performant routing that is not based on
 traditional iptables as it is the case with **kube-proxy**. Its **eBPF tables** enables constant performance as opposed to linear scans of iptables, that means that as the services grow performance stays consistent.
@@ -189,6 +195,40 @@ PORT=<YOUR-PORT>
 curl -sfL https://get.k3s.io | sh -s - agent \
   --token "${K3S_TOKEN}" \
   --server "https://${IP}:${PORT}"
+```
+
+The resulting cluster will now look like this:
+
+```mermaid
+graph TD
+    subgraph K3s_Cluster["K3s Cluster"]
+      subgraph Worker["Worker Node (k3s agent)"]
+            KubeletW["Kubelet"]
+            subgraph CiliumW["Cilium"]
+                CiliumDS["Cilium DaemonSet"]
+            end
+        end
+
+        subgraph Master["Master Node (k3s server)"]
+            KubeletM["Kubelet"]
+            API["Kubernetes API Server"]
+            Scheduler["Kube-Scheduler"]
+            Controller["Controller Manager"]
+            ETCD["etcd (embedded)"]
+            subgraph CiliumM["Cilium"]
+                CiliumDaemon["Cilium DaemonSet"]
+                CiliumEnvoy["Cilium Envoy"]
+                CiliumOperator["Cilium Operator"]
+            end
+        end
+    end
+
+    %% Style the subgraphs
+    style K3s_Cluster fill:#f0f8ff,stroke:#333,stroke-width:2px
+    style Master fill:#ffefc1,stroke:#333,stroke-width:1.5px
+    style Worker fill:#c1ffe7,stroke:#333,stroke-width:1.5px
+    style CiliumW fill:#d0d0ff,stroke:#333,stroke-width:1px
+    style CiliumM fill:#d0d0ff,stroke:#333,stroke-width:1px
 ```
 
 ---
