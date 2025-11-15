@@ -1,8 +1,6 @@
 ---
 title: "Kin Hong NG"
 layout: "about"
-summary: ""
-date: 2025-11-10
 links:
   - name: "Kin's LinkedIn"
     url: "https://linkedin.com/in/kin-hong-ng"
