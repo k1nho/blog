@@ -1,33 +1,32 @@
 ---
 title: "Kinho's Homelab Series - Securing your Network with Tailscale"
-pubDate: 2025-10-29
+pubDate: 2025-11-15
 Description: "Let's build a mini homelab! we kick off the journey by revitalizing an old laptop with Linux, and setting up a VPN with Tailscale"
 Categories: ["DevOps", "Networking", "Platform Engineering"]
-Tags: ["DevOps", "Homelab", "Networking"]
-cover: "what_is_cidr_cover.png"
+Tags: ["Homelab", "DevOps", "Networking"]
+cover: "homelabs_cover1.png"
 mermaid: true
-draft: true
 ---
 
-This year I want to really up my **DevOps** skills to the next level, as it is an area I am very interested in. After having such a great experience diving into **Kubernetes** services for the fantastic [NSDF Intersect](https://nationalsciencedatafabric.org/nsdf-intersect) project,
+This year I want to really up my **DevOps**/**Platform Engineering** skills to the next level, as it is an area I am very interested in. After having such a great experience diving into **Kubernetes** services for the fantastic [NSDF Intersect](https://nationalsciencedatafabric.org/nsdf-intersect) project,
 I decided that it is time to finally go full throttle into building my own **mini homelab** playground.
 
 Usually, when people think of a homelab, they picture a **huge server rack** with boxes upon boxes upon boxes... and, of course, a money tree 😁. However, If you are like me, chances are you want
 to build a **test lab**, one that can serve you to experiment different technologies.
 
-The plan is to start from just a barebones Linux distro and end up running my own Kubernetes cluster. Along the way, I might look into
+The plan is to start from just a barebones **Linux distro** and end up running my own **Kubernetes cluster**. Along the way, I might look into
 replacing Google photos with something like [Immich](https://immich.app/) or hosting a personal media server with [Jellyfin](https://jellyfin.org/). The possibilities are truly endless in the world of homelab.
 
 In this series, I will document my hardware, decision, and progress of the **Kinho's Homelab** adding piece by piece as I gain more knowledge. This is going to be fun! (and yes, we shall know [pain](https://www.youtube.com/shorts/xu7X5-5U-b0)).
-For this first article in the series, I’ll cover setting up my first node and securing my devices under a tailnet with WireGuard using [Tailscale](https://tailscale.com/).
+For this first article in the series, I’ll cover **setting up my first node and securing my devices under a tailnet with WireGuard** using [Tailscale](https://tailscale.com/).
 
 ---
 
 # Grandma's Laptop Has a Use!
 
-As I mentioned earlier, the goal is to build a homelab that works as a playground for experimentation which means even your grandma’s old laptop will work too.
+As I mentioned earlier, the goal is to build a homelab that works as a playground for experimentation which means even your **grandma’s old laptop** will work too.
 
-For me, that is an extremely old **Sony VAIO VPCEJ**, i3, 4GB RAM, and 500GB SSD. This machine is barely holding on under all the Windows bloatware, but it is ready to be reborn. To give new life to this poor soul, we will revitalize it with **Linux**.
+For me, that is an extremely old **Sony VAIO VPCEJ**, core i3, 4GB RAM, and 500GB SATA HD. This machine is barely holding on under all the Windows bloatware, but it is ready to be reborn. To give new life to this poor soul, we will revitalize it with **Linux**.
 
 ---
 
@@ -35,7 +34,7 @@ For me, that is an extremely old **Sony VAIO VPCEJ**, i3, 4GB RAM, and 500GB SSD
 
 When deciding which distro to flash onto the VAIO, I of course considered [Arch](https://archlinux.org/) btw, but it’s fine, I’ll wear the long bootcut pants for now and go with **Ubuntu**.
 
-The simple fact is I actually do not mind Ubuntu. In fact, any Linux is 10⁶ times better than Windows. It’s stable, and that is what we want here: a **solid environment**. Even though our main goal is experimentation, we do not want to deal with random breakages during setup. Don't get me wrong, Arch will get its shot in the future, but for now, it is **Ubuntu btw**.
+The simple fact is I actually do not mind Ubuntu. In fact, any **Linux is 10⁶ times better than Windows**. It’s stable, and that is what we want here: a **solid environment**. Even though our main goal is experimentation, we do not want to deal with random breakages during setup. Don't get me wrong, Arch will get its shot in the future, but for now, it is **Ubuntu btw**.
 
 If you have never flashed an OS before, you can follow these simple steps to [install Ubuntu server](https://ubuntu.com/tutorials/install-ubuntu-server#1-overview). Keep in mind that the image used in that tutorial is for a server environment, which is fine if you plan to use the laptop as a server only.  
 However, you can also go with the [Ubuntu Desktop](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview) image, if you intend to use the laptop as your daily driver as well.
@@ -51,9 +50,12 @@ Investigating more about how can I go about achieving it, I found the fantastic 
 
 # All This For Free
 
+![Tailscale logo](tailscale.png)
+
 **Tailscale** creates secure, point-to-point connectivity between devices using [WireGuard](https://www.wireguard.com/), forming what’s known as a **tailnet**. That means I can connect from my MacBook to my VAIO over SSH completely privately and, most importantly, securely.
 
 Even better, the [personal](https://tailscale.com/pricing?plan=personal) tier is incredibly generous, incuding up to 100 devices and 3 users. Not to glaze over it, but the setup was _incredibly easy_, which is always something I love to praise when trying out a new product.
+However, if you are more of FOSS person, I highly recommend checking the [Headscale Project](https://github.com/juanfont/headscale) as an option to self-host Tailscale's control server. **Headscale** implements a single tailnet being well suited for personal use.
 
 To set up my MacBook, I simply downloaded the [Tailscale client](https://tailscale.com/download/mac) from the official site and continued from there.  
 For my VAIO running Linux, joining the mesh was as simple as running:
@@ -113,7 +115,7 @@ While we could SSH simply using the convention **hostname@tailscale-ip**, that b
 devices to the tailnet. Fortunately, we could make use of [MagicDNS](https://tailscale.com/kb/1081/magicdns) which allow us to automatically **register DNS
 names for devices in our network**, that way we can substitute our raw tailscale IP for a readable name.
 
-![Tailscale MagicDNS in the Dashboard]()
+![Tailscale MagicDNS Update](magicdns.png)
 
 Lastly, I want to ditch SSH login via password, and even SSH keys as there is a configuration overhead per machine added. We can achieve this via
 the [Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh). To activate Tailscale SSH is as simple as starting tailscale with the following command.
