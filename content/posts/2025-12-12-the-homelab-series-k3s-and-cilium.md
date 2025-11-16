@@ -2,9 +2,9 @@
 title: "Kinho's Homelab Series - Orchestration Platform and Networking (K3s + Cilium)"
 pubDate: 2025-12-12
 Description: "Let's build a mini homelab! In this entry, I install Kubernetes and do a few modifications to introduce Cilium for networking, observability and security"
-Categories: ["DevOps", "Networking", "Platform Engineering"]
-Tags: ["DevOps", "Homelab", "Networking"]
-cover: "what_is_cidr_cover.png"
+Categories: ["DevOps", "Networking", "Platform Engineering", "Homelab Series"]
+Tags: ["DevOps", "Homelab Series", "Networking"]
+cover: "homelabs_cover2.png"
 mermaid: true
 draft: true
 ---
@@ -105,7 +105,7 @@ From the [official website](https://cilium.io/), we get the following definition
 
 > Cilium is an open source, cloud native solution for providing, securing, and observing network connectivity between workloads, fueled by the revolutionary Kernel technology eBPF
 
-In the previous section, we purposely went ahead and disable most of the built-ins related to networking in **Flannel CNI**, **Traefik LB**, **ServiceLB**, and **kube-proxy**.
+In the previous section, we purposely went ahead and disable most of the k3s built-ins related to networking in **Flannel CNI**, **Traefik LB**, **ServiceLB**, and **kube-proxy**.
 All of those components map to a specific [layer](https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/) in our networking stack.
 Enter **Cilium**, we will use it to unify our networking stack, that is, as our **CNI plugin** for pod networking, L4 service routing, and L7 load balancer for setting up Gateway API/ingress.
 
@@ -147,7 +147,7 @@ echo "export KUBECONFIG=$HOME/.kube/config" >> $HOME/.bashrc
 source $HOME/.bashrc
 ```
 
-We will now specify an `API_SERVER_IP` and a `API_SERVER_PORT` to run our installation. For the port, we can go ahead and use the [default api server port](https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane), and for the IP
+We will now specify an `IP` and a `PORT` to run our installation. For the port, we can go ahead and use the [default api server port](https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane), and for the IP
 you can go ahead and select what you have added in the previous steps. We can install Cilium with the following command:
 
 ```bash

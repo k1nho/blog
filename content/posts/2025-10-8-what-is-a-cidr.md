@@ -1,8 +1,8 @@
 ---
 title: "Byte Size Series - What is CIDR?"
 pubDate: 2025-10-08
-Categories: ["Networking", "DevOps", "Platform Engineering", "Byte Wisdom"]
-Tags: ["Byte Wisdom", "Networking", "DevOps", "Learning"]
+Categories: ["Networking", "DevOps", "Platform Engineering", "Byte Series"]
+Tags: ["Byte Series", "Networking", "DevOps", "Learning"]
 cover: "what_is_cidr_cover.png"
 mermaid: true
 ---

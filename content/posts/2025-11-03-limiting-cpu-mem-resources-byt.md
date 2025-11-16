@@ -2,8 +2,8 @@
 title: "Byte Size Series - Limiting CPU and Memory Usage with Cgroups"
 pubDate: 2025-11-03
 Description: "Kubernetes enables the user to set limits for resources such as CPU and memory, but how is the sausage made? In this byte size series entry we go over the fundamental concept of Cgroups!"
-Categories: ["Linux", "DevOps", "Platform Engineering", "Byte Wisdom"]
-Tags: ["Byte Wisdom", "Cgroups", "Linux", "DevOps", "Learning"]
+Categories: ["Linux", "DevOps", "Platform Engineering", "Byte Series"]
+Tags: ["Byte Series", "Cgroups", "Linux", "DevOps", "Learning"]
 cover: "bss_cgroups_cover.png"
 mermaid: true
 ---
