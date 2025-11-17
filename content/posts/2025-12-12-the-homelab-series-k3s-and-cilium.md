@@ -68,7 +68,7 @@ all the possible configuration options for the server [here](https://docs.k3s.io
 Let's install k3s with our configuration file by running the following command.
 
 ```bash
-curl -sfL https://get.k3s.io | sh -s - --config=$HOME/config.yaml
+curl -sfL https://get.k3s.io | sh -s - --config=$HOME/k3sconfig.yaml
 ```
 
 Now, if we check our cluster we should see the following:
@@ -155,14 +155,14 @@ IP=<YOUR-NODE-IP>
 PORT=<YOUR-PORT>
 cilium install --set k8sServiceHost=${IP} \
 --set k8sServicePort=${PORT} \
---set kubeProxyReplacement=true
+--set kubeProxyReplacement=true \
+--set ipam.operator.clusterPoolIPv4PodCIDRList="10.42.0.0/16"
 ```
 
 > [!NOTE]
-> If we install Cilium by default, you will notice that Cilium sets `cluster-pool-ipv4-cidr: 10.0.0.0/8` as its default in the configuration. This is fine
-> since we are going to be replacing kube-proxy that means that cilium will allocate ips to our pods from that cidr. However, if you do not substitute kube-proxy you
-> will need to change this to be inline with the default **PodCIDR** of k3s which is `10.42.0.0/16`, if we do not do that then pods will get IPs outside of the
-> **PodCIDR** which will break cross-node pod communication with services failing. This can be achieved with the `ipam.operator.clusterPoolIPv4PodCIDRList="10.42.0.0/16"`, Learn more about [CIDR]().
+> If we install Cilium by default, you will notice that Cilium sets `cluster-pool-ipv4-cidr: 10.0.0.0/8` as its default in the configuration. We will
+> change this to be inline with the default **PodCIDR** of k3s which is `10.42.0.0/16`, if we do not do that then pods will get IPs outside of the
+> **PodCIDR** which will break cross-node pod communication with services failing. This can be achieved with the `ipam.operator.clusterPoolIPv4PodCIDRList="<your-podcidr>"`. Learn more about [CIDR]().
 
 Let's check our installation with the following command:
 
