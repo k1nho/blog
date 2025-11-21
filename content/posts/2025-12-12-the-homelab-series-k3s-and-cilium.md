@@ -114,8 +114,18 @@ Enter **Cilium**, we will use it to unify our networking stack, that is, as our 
 ![eBPF logo](ebpf_logo.png)
 
 Cilium is based on [eBPF](https://ebpf.io/) which can **dynamically program the kernel**. This enables a more performant routing that is not based on
-traditional iptables as it is the case with **kube-proxy**. Its **eBPF tables** enables constant performance as opposed to linear scans of iptables, that means that as the services grow performance stays consistent.
+traditional iptables as it is the case with **kube-proxy**. Its **eBPF hashmaps** enables constant performance as opposed to linear scans of iptables, that means that as the services grow performance stays consistent.
 Not only that, but since Cilium can integrate neatly with the Linux Kernel, it can provide us with network observability and security policies for our cluster.
+
+Whereas other CNIs provide basic connectivity, Cilium provides powerful features such as:
+
+- Faster native pod-to-pod networking with eBPF (no kube-proxy and iptables overhead)
+- Real-time observability with [Hubble]()
+- Built-in security with Wireguard encryption
+- Advance Network Policy enforcement at multiple layers
+- Metal LB replacement with LB IPAM and L2 announcements
+
+Needless to say, Cilium is much more than just a **CNI**, its an important set piece that provides a fast, secure, and observable network stack adaptable to many needs.
 
 ---
 
