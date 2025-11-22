@@ -26,7 +26,7 @@ For this first article in the series, I’ll cover **setting up my first node an
 
 As I mentioned earlier, the goal is to build a homelab that works as a playground for experimentation which means even your **grandma’s old laptop** will work too.
 
-For me, that is an extremely old **Sony VAIO VPCEJ**, core i3, 4GB RAM, and 500GB SATA HD. This machine is barely holding on under all the Windows bloatware, but it is ready to be reborn. To give new life to this poor soul, we will revitalize it with **Linux**.
+For me, that is an old [Sony VAIO VPCEH](https://vaiolibrary.com/VPCEH), Core i3 2310M, 4GB SDRAM DDR3, and 512GB HDD. This machine is barely holding on under all the Windows bloatware, but it is ready to be reborn. To give new life to this poor soul, we will revitalize it with **Linux**.
 
 ---
 
