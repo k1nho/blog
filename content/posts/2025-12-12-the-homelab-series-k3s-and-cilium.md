@@ -9,11 +9,12 @@ mermaid: true
 draft: true
 ---
 
-Welcome to another entry in the **Kinho's Homelab Series**, we are following along from the previous [entry]() and today we continue by installing greek engineering helmsman ⎈, the almighty
-[**Kubernetes**](https://kubernetes.io/). This will serve as our main orchestration platform to run all the applications we want in our lab through the series.
+Welcome to another entry in the **Kinho's Homelab Series**. We’re picking up from the previous entry [Securing your Network with Tailscale]({{< relref "posts/" >}}). and today we continue by installing the Greek engineering helmsman ⎈, the almighty  
+[**Kubernetes**](https://kubernetes.io/). This will serve as our main orchestration platform to run all the applications we want in our lab throughout the series.
 
-We will also make some modifications to improve the base installation of k3s by adding the powerful [Cilium](https://cilium.io/) as our **CNI plugin and kube-proxy** replacement, along
-the way I'll discuss a few lessons learned.
+With the Tailscale mesh network in place, the plan is to run k3s on it and use **VXLAN overlay networking** so that nodes in different geographic locations can communicate as if they were on the same network.
+
+We will also make some modifications to improve the base installation of k3s by adding the powerful [Cilium](https://cilium.io/) as our **CNI plugin and kube-proxy** replacement. Along the way, I'll discuss a few decisions regarding the configuration of all of this software.
 
 ---
 
@@ -21,24 +22,25 @@ the way I'll discuss a few lessons learned.
 
 ![k3s logo](k3s_logo.png)
 
-Rolling your own Kubernetes on-prem usually can be done in a multiple ways. You could go for [Kubernetes the hard way](https://github.com/kelseyhightower/kubernetes-the-hard-way) if you really want to understand
-the guts of Kubernetes installing each component to create the control plane such as **container runtime**, **etcd** distributed key-value database, **api server**, **controller manager**, **scheduler**, **kubelet** and so on.
-A more practical way of installing Kubernetes is with [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/) which makes it much easier, you
-can follow along this [iximiuz labs tutorial](https://labs.iximiuz.com/tutorials/provision-k8s-kubeadm-900d1e53) if you are interested in setting it up.
+Rolling your own Kubernetes on-prem can usually be done in multiple ways. You could go for [Kubernetes the Hard Way](https://github.com/kelseyhightower/kubernetes-the-hard-way) if you really want to understand
+the guts of Kubernetes, installing each component to create the control plane, such as the **container runtime**, **etcd** distributed key-value database, **API server**, **controller manager**, **scheduler**, **kubelet**, and so on.
 
-All that said, in the previous entry, we went over [grandma's laptop]() specs which are indeed very tight (until I get to bring a more powerful node as the control plane). Considering that, I needed to install a lighter Kubernetes distribution. Enter [k3s](https://docs.k3s.io/)
-a fully compliant Kubernetes distribution by the [Rancher team](https://www.rancher.com/) that is great for edge, embedded, and of course our use case **homelab**.
+A more practical way of installing Kubernetes is with [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/), which makes the process much easier. You
+can follow along this fantastic [iximiuz labs tutorial](https://labs.iximiuz.com/tutorials/provision-k8s-kubeadm-900d1e53) if you’re interested in setting it up.
+
+All that said, in the previous entry we went over [grandma's laptop]() specs, which are indeed very tight (until I get to bring a more powerful node as the control plane). Considering that, I needed a **lighter Kubernetes distribution**.  
+Enter [k3s](https://docs.k3s.io/), a fully compliant Kubernetes distribution by the [Rancher team](https://www.rancher.com/) that is great for edge, embedded, and of course our use case, **homelab**.
 
 ---
 
 # Installing k3s
 
-We would do a few things to setup our next step. We want to prepare **Cilium** to unify our networking layer, and we will talk about about it in the next sections. For the moment,
-that roughly translates to going with the bare minimum k3s installation by disabling the flannel CNI, traefik, servicelb, and kube-proxy.
+We need to do a few things to set up our next step. We want to prepare **Cilium** to unify our networking layer, and we will talk more about it in the next sections. For the moment,
+that roughly translates to doing a bare minimum k3s installation by disabling the Flannel CNI, Traefik, servicelb, and kube-proxy.
 
 ## Configuring k3s bare minimum
 
-We can set up the options discussed in a unified configuration file which we can then pass to the k3s installation script.
+We can set up the options discussed in a unified configuration file, which we can then pass to the k3s installation script.  
 The configuration is as follows:
 
 ```k3sconfig.yaml
@@ -54,24 +56,24 @@ tls-san:
 cluster-init: true
 ```
 
-Note how I specify the `node-ip` and `tls-san` fields to use tailscale ip for the api server and generate a certificate. Another option that we set is the `cluster-init` option such that the cluster initializes with embedded `etcd` rather than the default sqlite. You can check
-all the possible configuration options for the server [here](https://docs.k3s.io/cli/server)
+Note how I specify the `node-ip` and `tls-san` fields to use the Tailscale IP for the API server and generate a certificate. Another option we set is `cluster-init`, so that the cluster initializes with embedded `etcd` rather than the default SQLite. You can check
+all the possible configuration options for the server [here](https://docs.k3s.io/cli/server).
 
 > [!NOTE]
-> If you are planning to run a single node setup with no SSD, I recommend sticking with the sqlite setup, but in the long run if you plan on **adding more nodes** to your cluster, installing `etcd` can provide you with with a fully [HA setup](https://docs.k3s.io/datastore/ha-embedded), just make sure to have
-> a odd number of server nodes to maintain quorum.
+> If you are planning to run a single-node setup with no SSD, I recommend sticking with the SQLite setup. But in the long run, if you plan on **adding more nodes** to your cluster, installing `etcd` can provide you with a fully [HA setup](https://docs.k3s.io/datastore/ha-embedded). Just make sure to have
+> an odd number of server nodes to maintain quorum.
 
 > [!WARNING]
-> The kubeconfig file at `/etc/rancher/k3s/k3s.yaml` is owned by root, and written with a default mode of 600. This is actually good, because if you change to 644
-> you will allow it to be read by other unprivileged users in the host
+> The kubeconfig file at `/etc/rancher/k3s/k3s.yaml` is owned by root and written with a default mode of 600. This is actually good because changing it to 644
+> would allow it to be read by other unprivileged users on the host.
 
-Let's install k3s with our configuration file by running the following command.
+Let's install k3s with our configuration file by running the following command:
 
 ```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server" sh -s - --config=$HOME/k3sconfig.yaml
 ```
 
-Now, if we check our cluster we should see the following:
+Now, if we check our cluster, we should see the following:
 
 ```bash
 sudo kubectl get no
@@ -79,21 +81,17 @@ sudo kubectl get no
 
 ![Image showing the result of running the command kubectl get nodes]()
 
-Importantly, if we list our pods running in kube-system, we can see that a few of our core components: **coredns**, **local-path-provisioner**, and **metrics-server**
-are in **pending** state all of which rely on networking. If you went with the default installation of k3s everything should work, however, we will prepare **Cilium**
-to take over these components.
+Importantly, if we list our pods running in the `kube-system` namespace, we can see that a few of our core components: **coredns**, **local-path-provisioner**, and **metrics-server** are in a **pending** state, all of which rely on networking. If you went with the default installation of k3s, everything should work. However, we will prepare **Cilium** to take over these components.
 
 ---
 
-# The CNCF Landscape is a Powerful Toolbox
+# About the CNCF Landscape
 
-The [CNCF Landscape](https://landscape.cncf.io/?view-mode=grid) can be intimidating with the large amount of projects available that contribute to modern cloud computing in different categories
-such as orchestration with the golden child **Kubernetes**, to coordination and discovery with **coredns** and **linkerd**. It can be really easy to spent a whole day
-scrolling through the different projects, and learning about their use cases.
+![CNCF Landscape Image Website](cncf_landscape.png "A small section of the entire CNCF landscape check more [here](https://landscape.cncf.io/?view-mode=grid)")
 
-However, as part of the very first [zero to merge](https://project.linuxfoundation.org/cncf-zero-to-merge-application) cohort of the Linux foundation, I learned that just as you should not contribute to a OSS just for the sake of contributing (actually find a project that you use frequently), you should not **shoehorn** a project just for sake of using it. In the past, I knew
-about **Cilium** but what it did went over my head, partly, do to being new with Kubernetes, and the other part due to not seeing how its functionalities fit in the landscape. So, let's
-get practical about why we want to configure **Cilium** in our k3s cluster.
+The [CNCF Landscape](https://landscape.cncf.io/?view-mode=grid) can be intimidating with the large number of projects available that contribute to modern cloud computing in different categories, such as orchestration with the golden child **Kubernetes**, mature coordination and discovery with **coredns**, and continuous delivery systems that enable GitOps such as **Argo CD** and **Flux**. It can be really easy to spend a whole day scrolling through the different projects and learning about their use cases.
+
+As part of the very first [Zero to Merge](https://project.linuxfoundation.org/cncf-zero-to-merge-application) cohort of the Linux Foundation, I learned an important lesson: just as **you should not contribute to an open source project only for the sake of contributing** (instead, focus on projects you actually use), you should not **shoehorn** a project into your setup just for the sake of using it. In the past, I knew about **Cilium**, but I did not fully understand what it did, partly because I was new to Kubernetes and partly because I had not seen how its functionalities fit into the larger landscape. Now, let's get practical about why we want to configure **Cilium** in our k3s cluster.
 
 ---
 
@@ -105,27 +103,25 @@ From the [official website](https://cilium.io/), we get the following definition
 
 > Cilium is an open source, cloud native solution for providing, securing, and observing network connectivity between workloads, fueled by the revolutionary Kernel technology eBPF
 
-In the previous section, we purposely went ahead and disable most of the k3s built-ins related to networking in **Flannel CNI**, **Traefik LB**, **ServiceLB**, and **kube-proxy**.
-All of those components map to a specific [layer](https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/) in our networking stack.
-Enter **Cilium**, we will use it to unify our networking stack, that is, as our **CNI plugin** for pod networking, L4 service routing, and L7 load balancer for setting up Gateway API/ingress.
+In the previous section, we purposely disabled most of the k3s built-ins related to networking, including **Flannel CNI**, **Traefik LB**, **ServiceLB**, and **kube-proxy**. Each of these components corresponds to a specific layer in our networking stack. Enter **Cilium**, we will use it to unify our networking stack, serving as our CNI plugin for pod networking, providing L4 service routing, and acting as an L7 load balancer for setting up **Gateway API and ingress**.
 
-## How can Cilium Achieve all of that ?
+## How Can Cilium Achieve All of That?
 
 ![eBPF logo](ebpf_logo.png)
 
-Cilium is based on [eBPF](https://ebpf.io/) which can **dynamically program the kernel**. This enables a more performant routing that is not based on
-traditional iptables as it is the case with **kube-proxy**. Its **eBPF hashmaps** enables constant performance as opposed to linear scans of iptables, that means that as the services grow performance stays consistent.
-Not only that, but since Cilium can integrate neatly with the Linux Kernel, it can provide us with network observability and security policies for our cluster.
+Cilium is based on [eBPF](https://ebpf.io/), which can **dynamically program the kernel**. This enables more performant routing that is not based on traditional iptables, as is the case with **kube-proxy**. Its **eBPF hashmaps** enable constant-time performance, unlike the linear scans used by iptables. This means that as the number of services grows, performance stays consistent.
 
-Whereas other CNIs provide basic connectivity, Cilium provides powerful features such as:
+Not only that, but because Cilium integrates neatly with the Linux kernel, it provides **network observability and security policies** for our cluster.
 
-- Faster native pod-to-pod networking with eBPF (no kube-proxy and iptables overhead)
+Whereas other CNIs provide basic connectivity, Cilium offers powerful features such as:
+
+- Faster native pod-to-pod networking with eBPF (no kube-proxy or iptables overhead)
 - Real-time observability with [Hubble]()
-- Built-in security with Wireguard encryption
-- Advance Network Policy enforcement at multiple layers
-- Metal LB replacement with LB IPAM and L2 announcements
+- Built-in security with WireGuard encryption
+- Advanced network policy enforcement at multiple layers
+- MetalLB replacement with LB IPAM and L2 announcements
 
-Needless to say, Cilium is much more than just a **CNI**, its an important set piece that provides a fast, secure, and observable network stack adaptable to many needs.
+Needless to say, Cilium is much more than just a **CNI**. It is a key component that provides a fast, secure, and observable network stack adaptable to many needs.
 
 ---
 
@@ -133,7 +129,7 @@ Needless to say, Cilium is much more than just a **CNI**, its an important set p
 
 ## Downloading the CLI
 
-Cilium can be installed in a couple of ways via helm charts or with its CLI. We will go ahead and [install its CLI](https://docs.cilium.io/en/latest/gettingstarted/k8s-install-default/#install-the-cilium-cli) for Linux with the following command:
+Cilium can be installed in a couple of ways, either via Helm charts or with its CLI. We will go ahead and [install its CLI](https://docs.cilium.io/en/latest/gettingstarted/k8s-install-default/#install-the-cilium-cli) for Linux using the following command:
 
 ```bash
 CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
@@ -147,8 +143,8 @@ rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 
 ## Configuring Cilium Installation
 
-Now that we have the CLI, we can go ahead and install Cilium. Before that we need the CLI to have access to the cluster, so we will set the `KUBECONFIG` environment
-variable to point to our `k3s.yaml` file in `/etc/rancher/k3s/k3s.yaml`. If you want you can move the file to its usual place under `.kube/config` with the following:
+Now that we have the CLI, we can go ahead and install Cilium. Before doing that, we need the CLI to have access to the cluster, so we will set the `KUBECONFIG` environment
+variable to point to our `k3s.yaml` file at `/etc/rancher/k3s/k3s.yaml`. If you want, you can move the file to its usual location under `.kube/config` using the following:
 
 ```bash
 mkdir -p $HOME/.kube
@@ -157,8 +153,7 @@ echo "export KUBECONFIG=$HOME/.kube/config" >> $HOME/.bashrc
 source $HOME/.bashrc
 ```
 
-We will now specify an `IP` and a `PORT` to run our installation. For the port, we can go ahead and use the [default api server port](https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane), and for the IP
-you can go ahead and select what you have added in the previous steps. We can install Cilium with the following command:
+We will now specify an `IP` and a `PORT` for our installation. For the port, we can use the [default API server port](https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane), and for the IP, select the one you configured in the previous steps. We can install Cilium with the following command:
 
 ```bash
 IP=<YOUR-NODE-IP>
@@ -170,11 +165,15 @@ cilium install --set k8sServiceHost=${IP} \
 ```
 
 > [!NOTE]
-> If we install Cilium by default, you will notice that Cilium sets `cluster-pool-ipv4-cidr: 10.0.0.0/8` as its default in the configuration. We will
-> change this to be inline with the default **PodCIDR** of k3s which is `10.42.0.0/16`, if we do not do that then pods will get IPs outside of the
-> **PodCIDR** which will break cross-node pod communication with services failing. This can be achieved with the `ipam.operator.clusterPoolIPv4PodCIDRList="<your-podcidr>"`. Learn more about [CIDR]().
+> By default, Cilium uses `cluster-pool-ipv4-cidr: 10.0.0.0/8` for its IPAM. That default can conflict with k3s’s PodCIDR (`10.42.0.0/16`), which may break cross-node pod communication if pods get IPs outside the intended range. To avoid this, explicitly set:
+>
+> ```yaml
+> ipam.operator.clusterPoolIPv4PodCIDRList="10.42.0.0/16"
+> ```
+>
+> (or whatever your PodCIDR is). For more details, see the [Cilium IPAM documentation](https://docs.cilium.io/en/stable/network/kubernetes/ipam-cluster-pool/).
 
-Let's check our installation with the following command:
+Let's check our installation status with the following command:
 
 ```bash
 cilium status --wait
@@ -182,7 +181,7 @@ cilium status --wait
 
 ![Terminal shows the result of the cilium status --wait command]()
 
-Finally, if we check our previous core components under `kube-system` that were in pending state:
+Finally, if we check our previous core components under the `kube-system` namespace that were in pending state:
 
 ![Terminal shows the result of running kubectl get po -A]()
 
@@ -190,15 +189,15 @@ Finally, if we check our previous core components under `kube-system` that were 
 
 # Adding Worker Nodes
 
-Let's finish by adding a worker node to our cluster for this I will introduce the second node in the cluster a desktop with i3, 4GB RAM, and GB SSD.
+Let's finish by adding a worker node to our cluster. For this, I will introduce the second node: a desktop with an i3 CPU, 4GB RAM, and a GB SSD.
 
-First, we need to get the token located at `/var/lib/rancher/k3s/server/token` with the following command:
+First, we need to get the token located at `/var/lib/rancher/k3s/server/token` using the following command:
 
 ```bash
 sudo cat /var/lib/rancher/k3s/server/token
 ```
 
-Similar to how we setup our master, we specify the following configuration for our agent node:
+Similar to how we set up our master, we specify the following configuration for our agent node:
 
 ```k3sagent.yaml
 node-ip: <your-worker-tailscale-ip>
@@ -206,13 +205,13 @@ token: <your-k3s-token>
 server: <https://<your-ip>:<your-port>
 ```
 
-Lastly, we install k3s on the agent as follows:
+Lastly, we install k3s on the agent using the following command:
 
 ```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent" sh -s - --config=$HOME/k3sagent.yaml
 ```
 
-Checking our nodes with kubectl:
+Checking the status of our nodes with `kubectl`:
 
 ```bash
 kubectl get no -owide
@@ -220,7 +219,7 @@ kubectl get no -owide
 
 ![Terminal shows the result of running kubectl get no -owide]()
 
-The resulting cluster will now look like this:
+The resulting cluster should now look like this:
 
 ```mermaid
 graph TD
@@ -256,12 +255,11 @@ graph TD
 
 ---
 
-# Wrapping up
+# Wrapping Up
 
-That's it for this entry, we have made tremendous progress at **Kinho’s Homelab**! We went ahead and installed **k3s** and unified our network stack with **Cilium**.
+That's it for this entry! We have made tremendous progress at **Kinho’s Homelab**. We installed **k3s** and unified our network stack with **Cilium**.
 
-We now have our own **orchestration platform**, but its looking a little empty. In our next entry, we will start to setup some applications to run in the cluster and some of **Cilium** features
-to get services.
+We now have our own **orchestration platform**, but it’s looking a little empty. Not only that, but many of our installations to the cluster have been manual, we certainly need to improve this. In the next entry, we will start setting up some applications to run in the cluster, and work on transitioning into a **GitOps workflow**!
 
 ---
 
