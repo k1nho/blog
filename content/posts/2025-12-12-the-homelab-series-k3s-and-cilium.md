@@ -42,6 +42,7 @@ We can set up the options discussed in a unified configuration file which we can
 The configuration is as follows:
 
 ```k3sconfig.yaml
+node-ip: <your-tailscale-ip>
 flannel-backend: "none"
 disable-kube-proxy: true
 disable-network-policy: true
@@ -53,8 +54,7 @@ tls-san:
 cluster-init: true
 ```
 
-Note how I specify the `tls-san` field to generate a certificate for our tailscale ip that we setup in the previous entry. You could also provide your own DNS record
-in there. Another option that we set is the `cluster-init` option such that the cluster initializes with embedded `etcd` rather than the default sqlite. You can check
+Note how I specify the `node-ip` and `tls-san` fields to use tailscale ip for the api server and generate a certificate. Another option that we set is the `cluster-init` option such that the cluster initializes with embedded `etcd` rather than the default sqlite. You can check
 all the possible configuration options for the server [here](https://docs.k3s.io/cli/server)
 
 > [!NOTE]
@@ -68,7 +68,7 @@ all the possible configuration options for the server [here](https://docs.k3s.io
 Let's install k3s with our configuration file by running the following command.
 
 ```bash
-curl -sfL https://get.k3s.io | sh -s - --config=$HOME/k3sconfig.yaml
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server" sh -s - --config=$HOME/k3sconfig.yaml
 ```
 
 Now, if we check our cluster we should see the following:
@@ -198,14 +198,27 @@ First, we need to get the token located at `/var/lib/rancher/k3s/server/token` w
 sudo cat /var/lib/rancher/k3s/server/token
 ```
 
-```bash
-K3S_TOKEN=<YOUR-TOKEN>
-IP=<YOUR-NODE-IP>
-PORT=<YOUR-PORT>
-curl -sfL https://get.k3s.io | sh -s - agent \
-  --token "${K3S_TOKEN}" \
-  --server "https://${IP}:${PORT}"
+Similar to how we setup our master, we specify the following configuration for our agent node:
+
+```k3sagent.yaml
+node-ip: <your-worker-tailscale-ip>
+token: <your-k3s-token>
+server: <https://<your-ip>:<your-port>
 ```
+
+Lastly, we install k3s on the agent as follows:
+
+```bash
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent" sh -s - --config=$HOME/k3sagent.yaml
+```
+
+Checking our nodes with kubectl:
+
+```bash
+kubectl get no -owide
+```
+
+![Terminal shows the result of running kubectl get no -owide]()
 
 The resulting cluster will now look like this:
 
