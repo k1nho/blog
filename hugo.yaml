@@ -85,7 +85,7 @@ params:
     name: "Kin Hong NG"
     title: "Sharing my developer stories, and research."
     description: "Present Day, Present Time hahaha"
-    avatar: "images/kinhongng.jpeg"
+    avatar: "images/kinhongng_pfp.jpg"
     social:
       - name: "GitHub"
         url: "https://github.com/k1nho"
