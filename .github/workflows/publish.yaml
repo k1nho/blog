@@ -1,0 +1,29 @@
+name: Publish Blog Image 
+
+on:
+  push:
+    tags:
+      - "**"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NAME: kinho-blog 
+      USERNAME: ${{github.repository_owner}}
+      PASSWORD: ${{secrets.GITHUB_TOKEN}}
+      SHA_TAG: ${{github.sha}}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: dagger/dagger-for-github@8.0.0
+
+      - name: Publish Blog Docker Image to ghcr
+        run: |
+          dagger call publish-image --registry=ghcr.io --name=$NAME --tag=latest --username=$USERNAME --password=env:PASSWORD # latest
+          dagger call publish-image --registry=ghcr.io --name=$NAME --tag=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # sha
