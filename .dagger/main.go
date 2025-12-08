@@ -34,8 +34,7 @@ func (m *BlogCi) PublishImage(ctx context.Context, name string,
 	container := m.BuildFromDockerfile(source)	
 
 	if registry != "ttl.sh" {
-		container.WithRegistryAuth(registry, username, password)
-		return container.Publish(ctx, fmt.Sprintf("%s/%s/%s:%s", registry, username, name, tag))
+		return container.WithRegistryAuth(registry, username, password).Publish(ctx, fmt.Sprintf("%s/%s/%s:%s", registry, username, name, tag))
 	} else {
 		return container.Publish(ctx, fmt.Sprintf("%s/%s-%.0f", registry, name, math.Floor(rand.Float64()*10000000)))
 	}
