@@ -14,8 +14,8 @@ type BlogCi struct{}
 // Build container from Dockerfile
 func (m *BlogCi) BuildFromDockerfile(
 	// +defaultPath="/"
-	source *dagger.Directory) *dagger.Container {
-	return dag.Container().Build(source)
+	source *dagger.Directory, platform dagger.Platform) *dagger.Container {
+	return dag.Container(dagger.ContainerOpts{Platform: platform}).Build(source)
 }
 
 
@@ -31,11 +31,23 @@ func (m *BlogCi) PublishImage(ctx context.Context, name string,
 	source *dagger.Directory,
 ) (string, error) {
 
-	container := m.BuildFromDockerfile(source)	
+	platforms := []dagger.Platform{
+		"linux/amd64",
+		"linux/arm64",
+	}
+	platformVariants := make([]*dagger.Container, 0, len(platforms))
+	for _, platform := range platforms {
+		platformVariants = append(platformVariants, m.BuildFromDockerfile(source, platform))
+	}
+
+	imageName := fmt.Sprintf("%s/%s/%s:%s", registry, username, name, tag)
+	ctr := dag.Container()
 
 	if registry != "ttl.sh" {
-		return container.WithRegistryAuth(registry, username, password).Publish(ctx, fmt.Sprintf("%s/%s/%s:%s", registry, username, name, tag))
+		ctr = ctr.WithRegistryAuth(registry, username, password)
 	} else {
-		return container.Publish(ctx, fmt.Sprintf("%s/%s-%.0f", registry, name, math.Floor(rand.Float64()*10000000)))
+		imageName = fmt.Sprintf("%s/%s-%.0f", registry, name, math.Floor(rand.Float64()*10000000))
 	}
+
+	return ctr.Publish(ctx, imageName, dagger.ContainerPublishOpts{PlatformVariants: platformVariants})
 }
