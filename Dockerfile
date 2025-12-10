@@ -1,4 +1,4 @@
-FROM ghcr.io/gohugoio/hugo:v0.152.2 as BUILDER
+FROM ghcr.io/gohugoio/hugo:v0.152.2 AS builder
 
 WORKDIR /src
 COPY . .
@@ -13,7 +13,7 @@ RUN hugo --minify -b "${BASE_URL}"
 
 FROM nginx:alpine3.22-slim
 
-COPY --from=BUILDER /src/public /usr/share/nginx/html
+COPY --from=builder /src/public /usr/share/nginx/html
 
 EXPOSE 80
 
