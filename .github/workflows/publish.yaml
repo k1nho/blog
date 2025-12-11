@@ -16,6 +16,7 @@ jobs:
       NAME: kinho-blog
       USERNAME: ${{github.repository_owner}}
       SHA_TAG: ${{github.sha}}
+      SEMVER_TAG: ${{github.ref_name}}
 
     steps:
       - name: Checkout repository
@@ -31,3 +32,4 @@ jobs:
         run: |
           dagger call publish-image --registry=ghcr.io --name=$NAME --tag=latest --username=$USERNAME --password=env:PASSWORD # latest
           dagger call publish-image --registry=ghcr.io --name=$NAME --tag=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # sha
+          dagger call publish-image --registry=ghcr.io --name=$NAME --tag=$SEMVER_TAG --username=$USERNAME --password=env:PASSWORD # semver
