@@ -30,6 +30,6 @@ jobs:
         env:
           PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dagger call publish-image --registry=ghcr.io --name=$NAME --tag=latest --username=$USERNAME --password=env:PASSWORD # latest
-          dagger call publish-image --registry=ghcr.io --name=$NAME --tag=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # sha
-          dagger call publish-image --registry=ghcr.io --name=$NAME --tag=$SEMVER_TAG --username=$USERNAME --password=env:PASSWORD # semver
+          dagger call publish-image --registry=ghcr.io --name=$NAME --version=latest --sha=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # latest
+          dagger call publish-image --registry=ghcr.io --name=$NAME --version=$SEMVER_TAG --sha=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # semver
+          dagger call publish-image --registry=ghcr.io --name=$NAME --version=$SHA_TAG --sha=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # sha
