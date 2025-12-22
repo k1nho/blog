@@ -1,5 +1,5 @@
 ---
-title: "Kinho's Homelab Series - Securing your Network with Tailscale"
+title: "Kinho's Homelab Series - Securing My Network with Tailscale"
 pubDate: 2025-11-15
 Description: "Let's build a mini homelab! we kick off the journey by revitalizing an old laptop with Linux, and setting up a VPN with Tailscale"
 Categories: ["DevOps", "Networking", "Platform Engineering"]
@@ -8,16 +8,16 @@ cover: "homelabs_cover1.png"
 mermaid: true
 ---
 
-This year I want to really up my **DevOps**/**Platform Engineering** skills to the next level, as it is an area I am very interested in. After having such a great experience diving into **Kubernetes** services for the fantastic [NSDF Intersect](https://nationalsciencedatafabric.org/nsdf-intersect) project,
-I decided that it is time to finally go full throttle into building my own **mini homelab** playground.
+This year I want to really up my **DevOps**/**Platform Engineering** skills to the next level, as it is an area I am very interested in. After having such a great experience diving into **Kubernetes** for the [NSDF Intersect](https://nationalsciencedatafabric.org/nsdf-intersect) project,
+I thought that it is finally time go full throttle into building my own **mini homelab playground**.
 
 Usually, when people think of a homelab, they picture a **huge server rack** with boxes upon boxes upon boxes... and, of course, a money tree 😁. However, If you are like me, chances are you want
-to build a **test lab**, one that can serve you to experiment different technologies.
+to build a **test lab**, one that can serve you to experiment different [cloud-native technologies](https://landscape.cncf.io/) and strategies.
 
-The plan is to start from just a barebones **Linux distro** and end up running my own **Kubernetes cluster**. Along the way, I might look into
-replacing Google photos with something like [Immich](https://immich.app/) or hosting a personal media server with [Jellyfin](https://jellyfin.org/). The possibilities are truly endless in the world of homelab.
+The plan is to start from just a barebones **Linux distro** and end up running my own **Kubernetes cluster**. Along the way, I'll look into
+hosting few services from a simple static site to a personal media server. The possibilities are truly endless in the world of homelab.
 
-In this series, I will document my hardware, decision, and progress of the **Kinho's Homelab** adding piece by piece as I gain more knowledge. This is going to be fun! (and yes, we shall know [pain](https://www.youtube.com/shorts/xu7X5-5U-b0)).
+In this series, I will document my hardware, decision, and progress of the **Kinho's Homelab** adding piece by piece as I research and gain more knowledge. This is going to be fun! (and yes, we shall know [pain](https://www.youtube.com/shorts/xu7X5-5U-b0)).
 For this first article in the series, I’ll cover **setting up my first node and securing my devices under a tailnet with WireGuard** using [Tailscale](https://tailscale.com/).
 
 ---
@@ -32,9 +32,11 @@ For me, that is an old [Sony VAIO VPCEH](https://vaiolibrary.com/VPCEH), Core i3
 
 # Ubuntu btw ?
 
-When deciding which distro to flash onto the VAIO, I of course considered [Arch](https://archlinux.org/) btw, but it’s fine, I’ll wear the long bootcut pants for now and go with **Ubuntu**.
+![Boomer Pants](ubuntubtw.jpg)
 
-The simple fact is I actually do not mind Ubuntu. In fact, any **Linux is 10⁶ times better than Windows**. It’s stable, and that is what we want here: a **solid environment**. Even though our main goal is experimentation, we do not want to deal with random breakages during setup. Don't get me wrong, Arch will get its shot in the future, but for now, it is **Ubuntu btw**.
+When deciding which distro to flash into the VAIO, I considered a few such as [Fedora](https://www.fedoraproject.org/server/), [Arch](https://archlinux.org/) btw, and even more k8s suitable one such as [Talos](https://www.talos.dev/). However, I’ll wear the boomer pants for now and go with **Ubuntu**.
+
+The simple fact is I actually do not mind Ubuntu. In fact, any **Linux is 10⁶ times better than Windows**. It’s stable, and that is what we want here: a **solid environment**. Even though our main goal is experimentation, we do not want to deal with random breakages during operations. Don't get me wrong, Arch will get its shot in the future, but for now, it is **Ubuntu btw**.
 
 If you have never flashed an OS before, you can follow these simple steps to [install Ubuntu server](https://ubuntu.com/tutorials/install-ubuntu-server#1-overview). Keep in mind that the image used in that tutorial is for a server environment, which is fine if you plan to use the laptop as a server only.  
 However, you can also go with the [Ubuntu Desktop](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview) image, if you intend to use the laptop as your daily driver as well.
@@ -43,8 +45,12 @@ However, you can also go with the [Ubuntu Desktop](https://ubuntu.com/tutorials/
 
 # Laptop Heavy, Knees Weak, Arms Heavy
 
-Ok, so the first issue I wanted to solve is this idea of accessing my VAIO through my Macbook via [SSH](https://en.wikipedia.org/wiki/Secure_Shell), since I will be out of my local network somedays, and just setting up the whole ordeal with authorized keys would be a hassle.
-Investigating more about how can I go about achieving it, I found the fantastic [Tailscale](https://tailscale.com/) and just wow I was amazed to what it had in store for this.
+Ok, so the first issue I wanted to tackle is [SSH](https://en.wikipedia.org/wiki/Secure_Shell) access to my VAIO from my Macbook. I wanted to approach this properly, because this decision would set the foundation for the architecture
+I have in mind, using [VXLAN overlay](https://www.hpe.com/us/en/what-is/vxlan.html#explained) to **connect multiple devices across different networks as if they were on the same local network**.
+
+Additionally, it’s very likely that I’ll be outside my local network at some point, and managing SSH access through authorized keys across multiple machines quickly becomes a hassle. I needed a solution that would enable **secure access without constantly juggling keys or reconfiguring SSH**.
+
+While researching ways to achieve this, I came across the fantastic [Tailscale](https://tailscale.com/), and honestly I was amazed to what it had in store for this.
 
 ---
 
@@ -64,8 +70,19 @@ For my VAIO running Linux, joining the mesh was as simple as running:
 curl -fsSL https://tailscale.com/install.sh | sh
 ```
 
-I have achieved my goal, I can now connect from my Macbook to my VAIO via SSH privately and securely. There is one more thing to take care of to finish
-securing the machine.
+Then, we can start the tailscale daemon as follows:
+
+```bash
+sudo tailscale up --ssh
+```
+
+Importantly, here we pass the `--ssh` flag to activate [Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh).
+The idea here is ditch SSH login via password, and even SSH keys as there is a configuration overhead per machine added.
+
+This feature, since it eliminates SSH key management while maintaining security. Tailscale SSH encrypts the connection over **WireGuard** using **Tailscale node keys** that are automatically
+generated and expire after each session. It even enforces authentication for high-risk connections (like root logins). Very neat!
+
+Just like that I can now connect from my Macbook to my VAIO via SSH privately and securely. There is one more thing to take care of to finish securing the machine.
 
 ---
 
@@ -116,16 +133,6 @@ devices to the tailnet. Fortunately, we could make use of [MagicDNS](https://tai
 names for devices in our network**, that way we can substitute our raw tailscale IP for a readable name.
 
 ![Tailscale MagicDNS Update](magicdns.png)
-
-Lastly, I want to ditch SSH login via password, and even SSH keys as there is a configuration overhead per machine added. We can achieve this via
-the [Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh). To activate Tailscale SSH is as simple as starting tailscale with the following command.
-
-```bash
-sudo tailscale up --ssh
-```
-
-I really like this feature, since it eliminates SSH key management while maintaining security. Tailscale SSH encrypts the connection over **WireGuard** using **Tailscale node keys** that are automatically
-generated and expire after each session. It even enforces authentication for high-risk connections (like root logins). Very neat!
 
 Now, I can access my machine with a much better convention over SSH and simply authenticate on Tailscale to achieve an encrypted connnection as follows:
 
