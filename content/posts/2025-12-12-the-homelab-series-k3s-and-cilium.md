@@ -202,7 +202,7 @@ Similar to how we set up our master, we specify the following configuration for 
 ```k3sagent.yaml
 node-ip: <your-worker-tailscale-ip>
 token: <your-k3s-token>
-server: <https://<your-ip>:<your-port>
+server: https://<your-ip>:<your-port>
 ```
 
 Lastly, we install k3s on the agent using the following command:
