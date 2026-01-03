@@ -107,8 +107,8 @@ params:
 
   analytics:
     google:
-      enabled: false
-      id: "id"
+      enabled: true
+      id: "G-7ELZG4S91G"
 
 menus:
   main:
