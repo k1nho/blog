@@ -106,6 +106,7 @@ params:
     maxHeight: "80vh"
 
   analytics:
+    enabled: true
     google:
       enabled: true
       id: "G-7ELZG4S91G"
