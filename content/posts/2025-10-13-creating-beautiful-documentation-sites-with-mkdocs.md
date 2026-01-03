@@ -15,11 +15,11 @@ I stumbled upon [Typer](https://typer.tiangolo.com/) with a solid ecosystem over
 
 However, as I was learning more about Typer, something caught my eye: its **beautiful and extensive documentation**. It made getting started a breeze, and it turns out it was built with [Mkdocs Material](https://squidfunk.github.io/mkdocs-material/).
 
-I actually had a need to create a few documentation sites for different scientific projects at work. These projects already had software but were missing documentation.
+I actually had a need to create a few documentation sites for different projects at work. These projects already had software but were missing documentation.
 
 Let’s walk through how to set up MkDocs Material and get a documentation site up and running.
 
-# Mkdocs Material Installation
+## Mkdocs Material Installation
 
 For this I will be using [uv](https://docs.astral.sh/uv/) as the package manager, but feel free to follow along with the default `venv`, `conda`, or anything else you like. Installing mkdocs is simple, we just run the following commands:
 
@@ -40,11 +40,11 @@ Great, now we are ready to use it to create our documentation. We will want to a
 3. [ ] Adding content
 4. [ ] Deploy on github pages
 
-# Setting Mkdocs Material Structure
+## Setting Mkdocs Material Structure
 
 The only two requirements we need to setup a valid Mkdocs material are:
 
-- A **mkdocs.yaml** at the root of the project, which will configure our website
+- A `mkdocs.yaml` at the root of the project, which will configure our website
 - A `docs/` folder, where our content files will go
 
 Let’s run the following commands to get our project started:
@@ -75,7 +75,7 @@ my_doc_site/
 3. [ ] Adding content
 4. [ ] Deploy on github pages
 
-# Configuring Our Site
+## Configuring the Site
 
 The file `mkdocs.yaml` will serve as the configuration file for our site. There is an extensive list of [fields](https://squidfunk.github.io/mkdocs-material/creating-your-site/#advanced-configuration) you can set, but for now, we can go with the minimal setup and enable material as the theme.
 
@@ -91,7 +91,7 @@ theme:
 3. [ ] Adding content
 4. [ ] Deploy on github pages
 
-# Adding content
+## Adding Content
 
 Earlier we mentioned that we use the `docs/` directory to place our content, so let's do that. Let's add an extra about page with the following command:
 
@@ -122,7 +122,7 @@ Let us visit the about page. We can then see the content that we have put in bef
 3. [x] Adding content
 4. [ ] Deploy on github pages
 
-# Deploy on Github Pages
+## Deploy on Github Pages
 
 Lastly, we want to make our documentation site accessible, so we can distribute and reference it in the future. Let us setup a github action that will automate the process for us whenever we modify our documentation and push to our main branch.
 

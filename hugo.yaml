@@ -99,6 +99,12 @@ params:
 
   dock: "float"
 
+  toc:
+    enabled: true
+    position: "right"
+    maxWidth: "280px"
+    maxHeight: "80vh"
+
 menus:
   main:
     - name: nav.posts # Display name
