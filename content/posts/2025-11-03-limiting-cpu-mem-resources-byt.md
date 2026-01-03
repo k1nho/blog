@@ -12,7 +12,7 @@ The rise of containers and their adoption across the industry with technologies 
 Beneath these abstractions lies the fundamental idea that allows us to start a Linux process while **limiting its CPU and memory resources** using [**Control Groups**](https://man7.org/linux/man-pages/man7/cgroups.7.html), also know as **cgroups**. In this entry of the byte size series, we'll explore how we can use [systemd](https://systemd.io/),
 one of the most used init systems in many Linux distros, to configure and add a process to a cgroup.
 
-# What is a cgroup ?
+## What is a cgroup ?
 
 From the [man pages](https://man7.org/linux/man-pages/man7/cgroups.7.html), we get the following:
 
@@ -31,7 +31,7 @@ To create a Cgroup manually, we would simply create a subdirectory, which then g
 Let’s move one level above this low-level abstraction and use **systemd** to control a Cgroup, which makes the work much easier.
 In fact, **systemd** performs operations under the `pseudo-filesystem` as if you were using it through shell commands directly. For example, creating a Cgroup manually would involve running `mkdir` on **/sys/fs/cgroup**.
 
-# Adding a Process to a Cgroup with Systemd (Transient Setup)
+### Adding a Process to a cgroup with Systemd (Transient Setup)
 
 To demonstrate cgroups, we will use `spin_loop.py` this is a simple program that loops forever adding more memory on each iteration.
 
@@ -90,7 +90,7 @@ systemd-run --collect -u eatmem -p CPUQuota=20% -p MemoryMax=1G python ~/spin_lo
 
 Just like that, we have prevented the process from going wild. Very cool!
 
-# Configuring a cgroup (Persistent Setup)
+### Configuring a cgroup (Persistent Setup)
 
 There is one more thing, if we ever wanted to save this configuration, that is a cgroup that monitors and limits the CPU quota and memory max to those that we specify, we would need to define a `slice`
 as otherwise the cgroup would be tied to the process that was invoked in it. We can achieve that with the following.
@@ -113,7 +113,7 @@ systemd-run -u eatmem --slice=eatmem.slice python ~/spin_loop.py
 
 If we add more processes, their **cumulative CPU and memory usage** will be limited according to our slice configuration.
 
-# Byte Bye
+## Byte Bye
 
 **cgroups** underpin one of the most powerful and important technologies in containerization. Managing `cgroupfs` via **systemd** is a lower-level abstraction, albeit important to understand, as container managers like [Containerd](https://containerd.io/)
 leverage **systemd** as a `cgroup driver` to control container resource usage. This ensures the system is protected from resource-hungry processes while distributing compute fairly.

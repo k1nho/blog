@@ -37,7 +37,7 @@ flowchart TB
 
 If we ever need to migrate our pipeline to another platform, we can simply move our code to that platform using Git and bam! run it the same way. Once we have our action, we can reuse[^2] it, since modules are just source code.
 
-# Coding up the RSS Scrapper
+## Coding up the RSS Scrapper
 
 OK, let's get started with our RSS feed automation. For this project, I'll be using [Dagger's Go SDK](https://github.com/dagger/dagger/tree/main/sdk/go).
 First, I'll create a simple HTTP client to get the RSS feed from my blog. We'll store the result in a custom RSS struct with all the important fields.
@@ -67,7 +67,7 @@ func fetchFeed(url string) (RSSFeed, error) {
 }
 ```
 
-# Automating README Writing
+## Automating README Writing
 
 It’s time to daggerize our workflow. We have a few steps to complete in order to achieve full automation:
 
@@ -90,7 +90,7 @@ func (m *K1nho) UpdateReadme(
 
 We will get to what the `source` and `token` arguments are for in just a bit, but first let us prepare the content.
 
-# Formatting the RSS Feed content
+## Formatting the RSS Feed content
 
 To update the **README.md**, we need to modify its current content and add the articles fetched by our RSS feed scraper. We’ll use a helper function to prepare the string to be written.
 
@@ -141,7 +141,7 @@ In this case, I have added the comments `<!-- BLOG-POST-LIST:START -->` and `<!-
 4. [ ] Run Git commands to upload changes
 5. [ ] Setup the Github Action
 
-# Container Time!
+## Container Time!
 
 Now it’s time to create our container to automate the process. Similar to writing a Dockerfile, we think in layers, starting from our base image and then adding the README.md file with the new content.
 
@@ -160,7 +160,7 @@ ctr := dag.Container().From("alpine/git").
 4. [ ] Run Git commands to upload changes
 5. [ ] Setup the Github Action
 
-# Pushing Update with Git
+## Pushing Update with Git
 
 Let’s finalize the workflow by setting up the Git operations.
 
@@ -190,7 +190,7 @@ we have been doing deferred evaluation, so in order to execute the pipeline we n
 4. [x] Run Git commands to upload changes
 5. [ ] Setup the Github Action
 
-# Automation Complete
+## Automation Complete
 
 All that's left is to set up our Dagger call in a GitHub Action. The YAML is very minimal, and more importantly, we now have a reusable module to update our `README.md` across any other Git hosting platform.
 
@@ -232,5 +232,4 @@ Resources:
 - [Dagger](https://dagger.io/)
 
 [^1]: [Note Making](https://libguides.cam.ac.uk/wolfsoncollege/notemaking)
-
 [^2]: [Dagger Reusability](https://docs.dagger.io/features/reusability/)

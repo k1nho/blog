@@ -98,14 +98,14 @@ Ideally, the record should have contained both updates instead of just Alice's. 
 
 [^1]: [Race condition](https://en.wikipedia.org/wiki/Race_condition)
 
-# How to Deal With the Data Race?
+## How to Deal With the Data Race?
 
 There are multiple ways to address a data race, but the two main approaches are pessimistic locking and optimistic locking[^2]. In our case, we will utilize optimistic locking to handle the data race.
 To protect our Pokémon record from a data race condition using optimistic locking, the following changes need to be implemented.
 
 [^2]: [Optimistic vs Pessimistic Locking](https://stackoverflow.com/questions/129329/optimistic-vs-pessimistic-locking)
 
-## Add a Version Column to the Pokemons Table
+### Add a Version Column to the Pokemons Table
 
 The first step to address the data race using optimistic locking, is to add a version column to our pokemons table. The version number will be defaulted to 1, as shown below:
 
@@ -114,7 +114,7 @@ ALTER TABLE pokemons
 ADD COLUMN version INTEGER NOT NULL DEFAULT 1;
 ```
 
-## Include the Version Field in the Queries
+### Include the Version Field in the Queries
 
 Now, we need to include the version field in our queries. For the GET method will include version to the list of fields to be returned from the query.
 
@@ -173,6 +173,6 @@ Now that we have handled the data race, one possible follow-up is to make use of
 
 Even though this is a simple example and the conflict may not seem harmful, it's crucial to recognize that such errors can lead to devastating consequences. For instance, when dealing with updates to an account's balance. Nevertheless, I hope this article has been helpful to you and has made you aware of the potential errors that can arise when implementing the PUT HTTP method in REST APIs.
 
-### Resources
+## Resources
 
 - [Let's Go Further By Alex Edwards. Chapter 6](https://lets-go-further.alexedwards.net/)

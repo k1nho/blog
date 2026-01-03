@@ -10,18 +10,18 @@ cover: "princess_okoku_cover.png"
 I recently participated in Rosebud.ai game jam, its 3rd entry focused on the extra cute theme. I ended up winning the game jam and in this post, I would like to take you on a journey from concept to creation of Princess Okoku,
 the game I created using the amazing asset generator PixelVibe , ChatGPT, and React.
 
-# React for Game Development ?
+## React for Game Development ?
 
 Hey don't start throwing the tomatoes! I am not a game developer, but I always have been a huge game fan, specially of rpgs, strategy and [gacha games](https://en.wikipedia.org/wiki/Gacha_game). In fact, one of my first tries of dabbling into game development dates back to almost 2–3 years ago
 ([The Programming Isekai Adventure](https://github.com/k1nho/gacha-game)) with a console based gacha game. When I saw that Rosebud open their 3rd game jam with the extra cute theme, I decided to give it a shot with my new skills.
 However, my expertise is on web, so I had to make a choice.
 
-# The Dragon Slayer or The Cooking Knife
+## The Dragon Slayer or The Cooking Knife
 
 Choosing what to use for the game came down to how fast I could ship the game given the time limit of the jam. I had the option of using Unity and while it was very enticing, learning Unity would take some time.
 Thus, I decided to go with React. React is a cooking knife, but surely I might be able to turn it into a dragon slayer capable of making a game.
 
-# Choosing a Game Concept
+## Choosing a Game Concept
 
 Initially, I though of going for a gacha game, it is fun and the easiness of asset generation provided by PixelVibe make it so that any character pull can be unique. However, I want it to go for a more enticing game mechanic
 and that is when I decided to go for an strategy game. When I saw the cartoony items, I though it was a perfect match for a card game.
@@ -46,7 +46,7 @@ I think it turned out to be very good, I wanted the player to search for their o
 
 ![Princess Okoku Fairies Story](princess_okoku_fairies_story.webp "Part of the Fairies Story")
 
-# Hardest Challenges
+## Hardest Challenges
 
 When it comes to game development, the challenges are far from scarce. In this section, I will explain the 3 most difficult challenges I faced when developing Princess Okoku.
 
@@ -84,12 +84,12 @@ The final challenge, was implementing the computer player. The computer player h
 I was able to employ user actions for the computer as well. However, I had to consider cost play, attack selection, and discard priority,
 all of which took some time to figure out. Yet, regardless of computer play, most of the decks can beat the story quite easily as the player always goes first which is usually an advantage!
 
-# Conclusion
+## Conclusion
 
 Overall, I loved working on Princess Okoku as it had been a long time since I had developed a game. Personally, I always struggled to get a game out, since the art was always a huge obstacle to get started,
 but PixelVibe made it a breeze to iterate on the specific assets I wanted for the game. I hope you enjoyed this post and decide to give Princess Okoku a try!
 
-# Links
+## Links
 
 - Princess Okoku : [Play](https://princess-okoku.vercel.app/)
 - Connect with me on Github: [@k1nho](https://github.com/k1nho)

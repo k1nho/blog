@@ -10,14 +10,14 @@ cover: "getting_started_in_oss_cover.png"
 October 31st marked the end of the 100 days of open source software (OSS) challenge by [Open Sauced](https://opensauced.pizza). This challenge aimed to unite newcomers, dedicated contributors, and maintainers within OSS projects to foster active involvement, learn new skills,
 and enhance community interaction by engaging in OSS for 100 days. As a participant of this challenge, I will share three significant lessons I learned from this experience to help newcomers in getting started with OSS and making meaningful contributions.
 
-# Open Source is Scary
+## Open Source is Scary
 
 ![Courage Typing](courage_type.gif)
 
 From an outsider's perspective, getting involved in open source software can seem intimidating. This feeling can be attributed to various factors, but the most common ones I've seen and personally experienced
 are **fear of the unknown**, **mastering technologies**, and **receiving feedback**. Let's break down each of these challenges.
 
-# Fear of The Unknown
+## Fear of The Unknown
 
 It's no secret that when you first dive into a new repository, you won't know everything about it. It might cover a specific software area you are unfamiliar with, or it might introduce you to concepts you've never encountered.
 This fear of the unknown can be paralyzing, leading to a point where some may give up without even trying.
@@ -31,7 +31,7 @@ remember that most OSS projects have active communities willing to provide suppo
 > [!TIP] Lesson
 > Embrace the fact that there will always be unknowns in OSS. Start small, run the project, and gradually piece together how it works. Leveraging the community is a valuable resource to accelerate your learning.
 
-# Mastery of Technologies
+## Mastery of Technologies
 
 In addition to dealing with the unknown, effective participation in OSS often requires proficiency in certain technologies. Given the collaborative nature of OSS, a distributed version control system like [Git](https://en.wikipedia.org/wiki/Git)
 is an essential tool for tracking file changes. Thus, it is important to have Git in your arsenal, since it is highly likely that a project you engage with in the OSS community will leverage Git for version control.
@@ -49,7 +49,7 @@ Lack of complete mastery of a particular technology should not deter you from co
 > [!TIP] Lesson
 > Pick a repository with technologies you already know; this will help you to bridge gaps of knowledge faster, and avoid learning while exploring. If you pick a technology that you don't know and want to challenge yourself, start with small repositories as this will give you enough time to learn outside of exploration.
 
-# Receiving Feedback
+## Receiving Feedback
 
 Last but certainly not least is the challenge of receiving feedback. If it's not a lack of skills or fear of the unknown that hinders contributors, what could it be? OSS is inherently collaborative,
 and effective communication is crucial. After you tackle an issue and submit a pull request, you'll likely receive feedback from the maintainer and reviewers.
@@ -63,7 +63,7 @@ your coding skills and communication. In some instances, however, you may encoun
 > [!TIP] Lesson
 > Treat feedback as an opportunity to enhance your technical skills and engage in effective communication with the maintainer to address any concerns. If you don't feel comfortable in a particular community, don't hesitate to explore other options.
 
-# Defining Open Source Goals
+## Defining Open Source Goals
 
 The question of why you should participate in OSS remains, and your motivations can vary widely. That's why it is crucial to [set goals for your OSS contributions](https://dev.to/opensauced/setting-goals-for-your-open-source-contributions-349b).
 Your objectives may include acquiring new skills, getting involved in exciting projects, seeking mentorship, or connecting with like-minded individuals who share your passion. You might even be contemplating becoming a maintainer to gain support for your own projects.
@@ -72,12 +72,12 @@ Regardless of your specific goals, I firmly believe that engaging in Open Source
 
 ![Never Give Up](never_give_up.gif)
 
-# Resources:
+## Resources
 
 - Get started with OSS here: [Open Sauced Intro to OSS Course](https://opensauced.pizza/learn/intro-to-oss)
 - [Hacktoberfest](https://hacktoberfest.com/participation/)
 
-# Links:
+## Links
 
 - Connect with me on Github: [@k1nho](https://github.com/k1nho)
 - Connect with me on X: [@Kinho_nth](https://x.com/kinho_nth)
