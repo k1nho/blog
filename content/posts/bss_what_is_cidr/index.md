@@ -3,7 +3,7 @@ title: "Byte Size Series - What is CIDR?"
 pubDate: 2025-10-08
 Categories: ["Networking", "DevOps", "Platform Engineering", "Byte Wisdom"]
 Tags: ["Byte Wisdom", "Networking", "DevOps", "Learning"]
-cover: "what_is_cidr_cover.png"
+cover: "gallery/what_is_cidr_cover.png"
 mermaid: true
 ---
 
@@ -83,7 +83,7 @@ In Kubernetes, each node in the cluster gets assigned a Pod CIDR, from which an 
 
 Did you know about CIDR?
 
-Resources:
+## Resources
 
 - [CIDR Calculator](https://www.ipaddressguide.com/cidr)
 - [What is CIDR](https://aws.amazon.com/what-is/cidr/)

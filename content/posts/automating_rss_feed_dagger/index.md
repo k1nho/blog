@@ -4,7 +4,7 @@ pubDate: 2025-10-22
 Description: "Its time to automate my RSS Feed scrapping with Go and Dagger"
 Categories: ["DevOps", "Go"]
 Tags: ["DevOps", "Go", "Dagger", "Automation"]
-cover: "rss_feed_automation_cover.jpg"
+cover: "gallery/rss_feed_automation_cover.jpg"
 mermaid: true
 ---
 
@@ -227,7 +227,7 @@ jobs:
 
 Full code: [here](https://github.com/k1nho/k1nho/blob/main/.dagger/main.go)
 
-Resources:
+## Resources
 
 - [Dagger](https://dagger.io/)
 
