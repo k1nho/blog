@@ -4,7 +4,7 @@ pubDate: 2026-03-12
 Description: "Let's build a mini homelab! In this entry, we move into the GitOps workflow with ArgoCD, explore secrets management, and deploy our first app!"
 Categories: ["DevOps", "Networking", "Platform Engineering", "Homelab Series"]
 Tags: ["DevOps", "Homelab Series", "GitOps", "Networking"]
-cover: "homelabs_cover3.png"
+cover: "gallery/homelabs_cover3.png"
 mermaid: true
 draft: true
 ---
@@ -21,7 +21,7 @@ In this entry, I will introduce [Argo CD](https://argo-cd.readthedocs.io/en/stab
 
 ## What is Argo CD ?
 
-![ArgoCD Logo](argocd_logo.png)
+![ArgoCD Logo](gallery/argocd_logo.png)
 
 From the official [Argo CD documentation ](https://argo-cd.readthedocs.io/en/stable/), we get a very simple definition:
 
@@ -61,7 +61,7 @@ From then on, we can access the argocd-server for now lets expose it locally via
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
-![ArgoCD UI Login](argocd_ui.png "ArgoCD Dashboard")
+![ArgoCD UI Login](gallery/argocd_ui.png "ArgoCD Dashboard")
 
 ### Bootstrapping the Cluster
 
@@ -115,14 +115,14 @@ the best choices for this approach are [Sealed Secrets](http://github.com/bitnam
 in which we pull secrets from an external manager **Azure Vault**, **AWS Secret Manager**, or **GCP Secret Manager** via an operator and sync them into Kubernetes (either directly into the pod that needs it or within a Secret object). The main idea here is once again
 to avoid plaintext secrets and keeps the repository secret-free. So which one should we choose?
 
-Initially, I considered using Bitnami's sealed secrets which is simple enough to setup; however, there's a few things that made me actually choose a **ESO**, namely
+Initially, I considered using [Bitnami's sealed secrets](http://github.com/bitnami-labs/sealed-secrets) which is simple enough to setup; however, there's a few things that made me actually choose a **ESO**, namely
 **secret rotation** and **API based secret management**. With **sealed secrets**, we would need to re-encrypt our secrets every single time we want to rotate the current secrets
 this is not too bad, but it becomes a bit manual. Moreover, having an API to create, fetch, and renovate secrets becomes incredibly important in CI/CD pipelines. While,
 we have **usual suspects**[^1] to choose from, I discovered [Infisical](https://infisical.com/) a poweful open source all in one secret management platform.
 
 ### The Infisical ESO
 
-![Infisical Logo](infisical_logo.png)
+![Infisical Logo](gallery/infisical_logo.png)
 
 Through this series, I like to consider this three as my bastions for choosing a particular software: **the project is open source, has a generous free tier, and can, if one chooses to, be self-hosted!**
 Infisical meets this criteria, and when I consider that they have both a [Kubernetes Operator](https://infisical.com/docs/integrations/platforms/kubernetes/overview) and an [SDK](https://infisical.com/docs/sdks/overview)
@@ -223,7 +223,7 @@ spec:
 
 Notice we define the path `apps/tailscale-operator` this will pick up our `kustomization.yaml` definition, that packs the Infisical Secret CRD `operator-oauth-secret.yaml`:
 
-```yaml
+```yaml {filename="apps/tailscale-operator/tailscale-operator-values.yaml"}
 apiVersion: secrets.infisical.com/v1alpha1
 kind: InfisicalSecret
 metadata:
@@ -258,29 +258,159 @@ and what a better one than this blog itself!
 To be able to define declarative our workload, we will need to create some Kubernetes resources that will be pushed into our repository for Argo to sync. More importantly,
 we do not have an image for the blog, so let's get started by creating a pipeline that will build our image when we push a tag in the blog repository.
 
-#### Dagger Module
+#### Initializing Dagger Module
+
+Let's start by initializing our dagger module this is where our CI code will live.
+
+```bash
+dagger init --sdk=go --name=blog-ci
+```
+
+The following will create the `.dagger` directory with some boiler plate, I choose [Go](https://go.dev/) for the sdk, but feel free
+to choose any language from their [available sdks](https://docs.dagger.io/getting-started/api/sdk/).
+
+#### Build CI
+
+In order to have a container image to use for our Kubernetes deployment, we need to have a pipeline
+that will build and publish the container image. Let's start with the build.
+
+```go {filename=".dagger/main.go"}
+// Build container from Dockerfile
+func (m *BlogCi) BuildFromDockerfile(
+	// +defaultPath="/"
+	source *dagger.Directory,
+	platform dagger.Platform,
+	tags ImageTags,
+	// +default="http://localhost:8080/"
+	base_url string,
+) *dagger.Container {
+	return dag.Container(dagger.ContainerOpts{Platform: platform}).
+		Build(source, dagger.ContainerBuildOpts{
+			BuildArgs: []dagger.BuildArg{
+				dagger.BuildArg{Name: "BASE_URL", Value: base_url},
+				dagger.BuildArg{Name: "GIT_SHA", Value: tags.SHA},
+				dagger.BuildArg{Name: "VERSION", Value: tags.Version},
+			},
+		}).
+		WithLabel("org.opencontainers.image.created", time.Now().UTC().Format(time.RFC3339))
+}
+```
+
+We define the `BuildFromDockerfile` that takes some parameters:
+
+- `source`: the directory where the Dockerfile is located
+- `platform`: the specific platform variant, i.e, linux/amd64
+- `tags`: A struct that contains both semantic version and github sha
+- `base_url`: Hugo specific base url for the website
+
+This will return a dagger container correctly tagged and ready to be published to a container registry.
+
+#### Publish CI
+
+Now, that we have a dagger function that will built a container from us, we can publish that container
+by providing the specified parameters.
+
+```go {filename=".dagger/main.go", linenos=true, hl_lines=["26-30"]}
+// Publish Docker image to registry
+func (m *BlogCi) PublishImage(ctx context.Context, name string,
+	// +default="latest"
+	version string,
+	sha string,
+	// +default="ttl.sh"
+	registry string,
+	username string,
+	password *dagger.Secret,
+	// +defaultPath="/"
+	source *dagger.Directory,
+) (string, error) {
+
+	platforms := []dagger.Platform{
+		"linux/amd64",
+		"linux/arm64",
+	}
+	platformVariants := make([]*dagger.Container, 0, len(platforms))
+	for _, platform := range platforms {
+		platformVariants = append(platformVariants, m.BuildFromDockerfile(source, platform, ImageTags{Version: version, SHA: sha}, "http://localhost:8080/"))
+	}
+
+	imageName := fmt.Sprintf("%s/%s/%s:%s", registry, username, name, version)
+	ctr := dag.Container()
+
+	if registry != "ttl.sh" {
+		ctr = ctr.WithRegistryAuth(registry, username, password)
+	} else {
+		imageName = fmt.Sprintf("%s/%s-%.0f", registry, name, math.Floor(rand.Float64()*10000000))
+	}
+
+	return ctr.Publish(ctx, imageName, dagger.ContainerPublishOpts{PlatformVariants: platformVariants})
+}
+```
+
+The logic from line 26-30 help us test the pipeline locally by publishing the container image to [ttl.sh](https://ttl.sh/),
+and if we provide a different registry such as **ghcr.io** or **dockerhub**, it will apply the registry auth.
+
+#### Finishing the pipeline with Github Actions
+
+Lastly, we can wrap our dagger call and have a simple github action that will run when we publish a tag as follows:
+
+```yaml {filename=".github/workflows/publish.yaml"}
+name: Publish Blog Image
+
+on:
+  push:
+    tags:
+      - "**"
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NAME: kinho-blog
+      USERNAME: ${{github.repository_owner}}
+      SHA_TAG: ${{github.sha}}
+      SEMVER_TAG: ${{github.ref_name}}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: dagger/dagger-for-github@8.0.0
+
+      - name: Publish Blog Docker Image to ghcr
+        env:
+          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dagger call publish-image --registry=ghcr.io --name=$NAME --version=latest --sha=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # latest
+          dagger call publish-image --registry=ghcr.io --name=$NAME --version=$SEMVER_TAG --sha=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # semver
+          dagger call publish-image --registry=ghcr.io --name=$NAME --version=$SHA_TAG --sha=$SHA_TAG --username=$USERNAME --password=env:PASSWORD # sha
+```
 
 ### Exposing the Blog
+
+All that's left is to define our blog resources to be applied by Argo.
 
 ---
 
 ## Wrapping up
 
 That's it for this entry! we started by migrating our existing Cilium deployment into a declarative GitOps workflow which led us to the introduction of ArgoCD. From there
-we adopted Argo's App of Apps pattern and setup our Infisical as our secret management solution, and the tailscale operator. Lastly, we deployed the blog as the first
+we adopted Argo's App of Apps pattern and setup Infisical as our secret management solution, and the tailscale operator. Lastly, we deployed the blog as the first
 application, and expose it with the Tailscale Ingress!
 
 The cluster is now alive with the blog running! but there are many more improvements needed. First, we have deployed multiple applications but we have to monitor effectively
 the resource compsumption and traffic of the different services in our cluster. Moreover, we have not had the need for a database to **persistently store information**, when the time comes (and it will come) a solution
 for provisioning storage, backup, and a disaster recovery strategy becomes important to keep data safe. In the next entry, we'll explore a few of these!
 
+- **Previous: [Kinho's Homelab Series - Orchestration Platform and Networking (K3s + Cilium)]()**
+- **Next: TBD**
+
 ---
 
-### Next in Kinho's Homelab Series
-
-**TBD**
-
-### Resources
+## Resources
 
 - [What is GitOps ?](https://about.gitlab.com/topics/gitops/)
 - [Argo CD Documentation](https://docs.k3s.io/)
