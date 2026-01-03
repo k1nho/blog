@@ -1,5 +1,5 @@
 ---
-title: "Kinho's Homelab Series - GitOps, Secrets and First Application"
+title: "Kinho's Homelab Series - GitOps, Secrets, and First Application"
 pubDate: 2026-01-12
 Description: "Let's build a mini homelab! In this entry, we move into the GitOps workflow with ArgoCD, explore secrets management, and deploy our first app!"
 Categories: ["DevOps", "Networking", "Platform Engineering", "Homelab Series"]
@@ -9,7 +9,7 @@ mermaid: true
 draft: true
 ---
 
-Welcome to another entry in the **Kinho's Homelab Series**, in the last [entry]() we setup our orchestration platform with K3s and solidified our network
+Welcome to another entry in the **Kinho's Homelab Series**, in the last [entry](), we setup our orchestration platform with K3s and solidified our network
 stack with Cilium. However, At this point we have built a whole Kubernetes cluster whose only job is to exist, no apps, no workloads just vibes.
 
 On top of that, installation of Helm charts such as the one for Cilium were installed by hand, which means there’s no structure, no repeatability, and no easy way to rebuild.
@@ -65,39 +65,70 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 ### Bootstrapping the Cluster
 
-The Argo UI is very nice, however, using it defeats the purpose of setting up a declarative GitOps workflow, that is, we want to use Git as the centralized source
-of truth of the cluster. As such any changes to the cluster will be logically related to a commit. We let Argo sync the cluster using our repository to apply the
+The Argo UI is very nice, however, using it to create applications and resources defeats the purpose of setting up a declarative GitOps workflow. We want to use Git as the centralized source
+of truth of the cluster. As such, we'll use the [app of apps pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#app-of-apps) to easily manage the state of the cluster. Any changes to the cluster will be logically related to a commit. We let Argo sync the cluster using our repository to apply the
 necessary resources.
+
+To bootstrap the cluster with Argo, we'll apply an Application CRD from Argo to trigger all the other applications that will be installed.
+
+```yaml {filename="bootstrap/root.yaml", linenos=true ,hl_lines=[11, 15]}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bootstrap
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # system level priority on sync (https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/)
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/k1nho/homelab
+      targetRevision: main
+      path: argo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+
+- **Line 11** defines the url for the repository that we want Argo to sync from. In this case, its my own repository.
+- **Line 15** defines the destination where this app will be deployed, we use the `https://kubernetes.default.svc` convention to say that it will be the local cluster.
+- In the **sync policy**, we specify automatic **pruning** (delete resources if they are no longer defined in Git) and **self-healing** (revert any changes that cause drift from the cluster state defined in Git)
 
 ---
 
 ## Strategy for Managing Secrets
 
-Many of the applications we will run require [secrets](), however as you might have already noticed we are managing our cluster publicly and we will like not to be another one in the list of the [39 million secrets leaked on Github](https://resources.github.com/enterprise/understanding-secret-leak-exposure/) 😅. That begs the question:
+Many of the applications we will run require [secrets](https://kubernetes.io/docs/concepts/configuration/secret/), however as you might have already noticed we are managing our cluster publicly and we will like not to be another one in the list of the [39 million secrets leaked on Github](https://resources.github.com/enterprise/understanding-secret-leak-exposure/) 😅. That begs the question:
 
 > **How can we introduce secrets into the cluster in an automated way without leaking them?**
 
 There are two popular choices to manage secrets within a GitOps workflow either with a **Secrets Operations Encryption** [(SOPS)](), or with an **External Secret Operator** [(ESO)]().
+
+### SOPS and ESO
 
 The **SOPS** approach encrypts secrets that you can push into the repository such that decryption happens only within the cluster. This avoids the common pitfall of plaintext leaked secrets. Some of
 the best choices for this approach are [Sealed Secrets](http://github.com/bitnami-labs/sealed-secrets), and [age](https://github.com/FiloSottile/age). On the other hand, we have the **ESO** approach
 in which we pull secrets from an external manager **Azure Vault**, **AWS Secret Manager**, or **GCP Secret Manager** via an operator and sync them into Kubernetes (either directly into the pod that needs it or within a Secret object). The main idea here is once again
 to avoid plaintext secrets and keeps the repository secret-free. So which one should we choose?
 
-### The Infisical ESO
-
-![Infisical Logo](infisical_logo.png)
-
 Initially, I considered using Bitnami's sealed secrets which is simple enough to setup; however, there's a few things that made me actually choose a **ESO**, namely
 **secret rotation** and **API based secret management**. With **sealed secrets**, we would need to re-encrypt our secrets every single time we want to rotate the current secrets
 this is not too bad, but it becomes a bit manual. Moreover, having an API to create, fetch, and renovate secrets becomes incredibly important in CI/CD pipelines. While,
 we have **usual suspects**[^1] to choose from, I discovered [Infisical](https://infisical.com/) a poweful open source all in one secret management platform.
 
+### The Infisical ESO
+
+![Infisical Logo](infisical_logo.png)
+
 Through this series, I like to consider this three as my bastions for choosing a particular software: **the project is open source, has a generous free tier, and can, if one chooses to, be self-hosted!**
 Infisical meets this criteria, and when I consider that they have both a [Kubernetes Operator](https://infisical.com/docs/integrations/platforms/kubernetes/overview) and an [SDK](https://infisical.com/docs/sdks/overview)
 it ends up fullfilling the other requirements: **sync secrets into our cluster**, and **manage them with an API**. Let's define our Argo App to deploy the infisical secrets operator.
 
-```yaml {filename="argo/infisical.yaml"}
+```yaml {filename="argo/infisical.yaml", linenos=true, hl_lines=[11,16, 28]}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -128,7 +159,13 @@ spec:
       - CreateNamespace=true
 ```
 
-Let's test the ESO in the next section where we will need an oauth secret for our **tailscale operator**.
+The spec is similar to how we defined the bootstrap application with some differences:
+
+- **Line 11** defines the repository url where the helm chart of the operator is hosted
+- **Line 16** defines a path in our repository where our custom values for the operator's helm chart are defined
+- **Line 28** sets the `CreateNamespace` variable to true, so that it can create the `infisical-secrets-operator` namespace resource if it does not exist.
+
+Let's test the **infisical ESO** in the next section where we will need an oauth secret for our **tailscale operator**.
 
 ---
 
