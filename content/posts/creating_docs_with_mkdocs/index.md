@@ -4,7 +4,7 @@ pubDate: 2025-10-13
 Description: "You want beautiful documentation with an integrated search functionality? look no further than Mkdocs Material!"
 Categories: ["Documentation", "Web Dev", "Open Source", "Tutorial"]
 Tags: ["Beginner", "Tutorial", "Story"]
-cover: "create_beautiful_docs_mkdocs_cover.png"
+cover: "gallery/create_beautiful_docs_mkdocs_cover.png"
 ---
 
 Documentation is one of the most important pieces in any software project. Without documentation, it becomes harder to onboard new developers or gather community feedback, since there is
@@ -111,11 +111,11 @@ mkdocs serve
 
 If we check [localhost:8000](http://localhost:8000), we should now see our site with already a lot of structure baked in such as a navbar, search bar, navigation links, and a table of contents for the current page.
 
-![Mkdocs Basic Site](mkdocs_basic.png "A lot is already added! including a search bar")
+![Mkdocs Basic Site](gallery/mkdocs_basic.png "A lot is already added! including a search bar")
 
 Let us visit the about page. We can then see the content that we have put in before.
 
-![Mkdocs About Page](mkdocs_about.png)
+![Mkdocs About Page](gallery/mkdocs_about.png)
 
 1. [x] Documentation structure
 2. [x] Configuring site via mkdocs.yaml
@@ -172,7 +172,7 @@ jobs:
 That it is! We have deployed our documentation using GitHub Pages and can now distribute it as needed. As an exercise you can check out the [Mkdocs Material Reference](https://squidfunk.github.io/mkdocs-material/reference/)
 to add things like admonitions, tables, and more. Also, you can explore how to add custom routing or themes with palette support for light/dark modes.
 
-Resources:
+## Resources
 
 - [Mkdocs Material](https://squidfunk.github.io/mkdocs-material/)
 - [Mkdocs Material Reference](https://squidfunk.github.io/mkdocs-material/reference/)

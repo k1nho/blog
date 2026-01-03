@@ -59,12 +59,6 @@ params:
   language: "en-US"
   shortName: "Kinho"
 
-  stickyHeader: true # Sticky navigation bar
-  showThemeSwitch: false # Whether to show theme color switch button
-  showDarkModeSwitch: true # Whether to show dark mode switch button
-  showLanguageSwitch: true # Whether to show language switch button
-  languageSwitchMode: "dropdown" # Language switch mode: "dropdown" or "cycle"
-
   home:
     recentPostsCount: 5
 
@@ -74,12 +68,18 @@ params:
     license:
       show: false
 
-  logo:
-    image: "/blog/images/logokin.png" # Relative path in static directory
-    link: "/blog/"
+  header:
+    sticky: true
+    logo:
+      image: "/images/logokin.png" # Relative path in static directory
+      link: "/blog/"
+    showThemeSwitch: false
+    showDarkModeSwitch: true # Whether to show dark mode switch button
+    showLanguageSwitch: false # Whether to show language switch button
+    languageSwitchMode: "dropdown" # Language switch mode: "dropdown" or "cycle"
 
   favicon:
-    svg: "logokin.ico"
+    svg: "/favicon.svg"
 
   author:
     name: "Kin Hong NG"
@@ -104,6 +104,11 @@ params:
     position: "right"
     maxWidth: "280px"
     maxHeight: "80vh"
+
+  analytics:
+    google:
+      enabled: false
+      id: "id"
 
 menus:
   main:

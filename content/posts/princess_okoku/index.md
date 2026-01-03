@@ -4,7 +4,7 @@ pubDate: 2023-04-08
 Description: "Can I win a gamejam in 24 hours using webdev technologies? In this article, I describe how I managed to do just that using React, and ChatGPT for Rosebud AI Cute Gamejam"
 Categories: ["Game Dev", "Hackathon", "Web Dev", "TypeScript"]
 Tags: ["Game Dev", "Web Dev", "Learning", "Story"]
-cover: "princess_okoku_cover.png"
+cover: "gallery/princess_okoku_cover.png"
 ---
 
 I recently participated in Rosebud.ai game jam, its 3rd entry focused on the extra cute theme. I ended up winning the game jam and in this post, I would like to take you on a journey from concept to creation of Princess Okoku,
@@ -27,13 +27,13 @@ Initially, I though of going for a gacha game, it is fun and the easiness of ass
 and that is when I decided to go for an strategy game. When I saw the cartoony items, I though it was a perfect match for a card game.
 I decided to create 4 unique decks using PixelVibe each with their own game mechanic and storyline. I ended up with Cyberpunk Princesses, Dragons, Fairies, and Talking Cats as the 4 archetypes.
 
-![card creation](card_creation.webp "Beginnings of card creation")
+![card creation](gallery/card_creation.webp "Beginnings of card creation")
 
 Moreover, each deck was carefully crafted by prompting PixelVibe to generate the assets. For example, take a look at the talking cats deck, Troas the astronaut cat also has a complementary spell card called the Heltroas
 which was generated perfectly with the prompt “astronaut helmet with cat ears” using the Cartoony items model. Also, PixelVibe yields 4 variations of a single prompt at a time,
 so one could decide which one fits better the theme. I personally liked this helmet, as it had the reflection of space which was a critical part of the talking cats story.
 
-![card results](card_results.webp "On the left, Troas the Astronaut Cat. On the right, the Heltroas helmet of Troas")
+![card results](gallery/card_results.webp "On the left, Troas the Astronaut Cat. On the right, the Heltroas helmet of Troas")
 
 I was very satisfied with the results of the cartoony items model, so I decided to use the exoplanet and epic space environment models as well for story and battle backgrounds.
 I would also like to see the model to have an option to create sprite sheets from a given image, as I was thinking on putting some animations for certain cards on battle.
@@ -44,17 +44,17 @@ I think it turned out to be very good, I wanted the player to search for their o
 
 > ChatGPT Prompt: Create a dialog for the following characters (Princess Kaede, Terra, Alance, and the Astro Fairy). Give the impression that although dragons though of fairies as humble and kind, they are actually extremely rude. Add remarks of how they hate dragons.
 
-![Princess Okoku Fairies Story](princess_okoku_fairies_story.webp "Part of the Fairies Story")
+![Princess Okoku Fairies Story](gallery/princess_okoku_fairies_story.webp "Part of the Fairies Story")
 
 ## Hardest Challenges
 
 When it comes to game development, the challenges are far from scarce. In this section, I will explain the 3 most difficult challenges I faced when developing Princess Okoku.
 
-## Tutorials are hard
+## Tutorials are Hard
 
 At first, I though of skipping the tutorial section, however, I though having this section was fundamental to set up the game right. First, it gives a summary of what the game its about and its story. Second, it allows the player to not start with a default deck, but rather choose the archetype they want to play right away from the four available. Then, I though of having a walkthrough to teach how a battle goes, but with short time, I had to cut this one down, specially after the 8 hour bug.
 
-![Princess Okoku Deck Selection](princess_okoku_deck_screen.webp "Choosing a Deck Screen")
+![Princess Okoku Deck Selection](gallery/princess_okoku_deck_screen.webp "Choosing a Deck Screen")
 
 ## The 8 hour bug (card stat mutation problem)
 
@@ -78,7 +78,7 @@ export const getCard = (id: string): Card => {
 };
 ```
 
-## Computer player
+## Computer Player
 
 The final challenge, was implementing the computer player. The computer player had to perform all the actions of an user, while at the same time being efficient. Thanks to the flexibility of Zustand,
 I was able to employ user actions for the computer as well. However, I had to consider cost play, attack selection, and discard priority,
