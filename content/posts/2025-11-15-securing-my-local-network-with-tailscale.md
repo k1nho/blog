@@ -1,7 +1,7 @@
 ---
-title: "Kinho's Homelab Series - Securing My Network with Tailscale"
+title: "Kinho's Homelab Series - Securing my Network with Tailscale"
 pubDate: 2025-11-15
-Description: "Let's build a mini homelab! we kick off the journey by revitalizing an old laptop with Linux, and setting up a VPN with Tailscale"
+Description: "Let's build a mini homelab! we kick off the journey by revitalizing an old laptop with Linux, and setting up a VPN with Tailscale."
 Categories: ["DevOps", "Networking", "Platform Engineering"]
 Tags: ["Homelab", "DevOps", "Networking"]
 cover: "homelabs_cover1.png"
@@ -22,7 +22,7 @@ For this first article in the series, I’ll cover **setting up my first node an
 
 ---
 
-# Grandma's Laptop Has a Use!
+## Grandma's Laptop Has a Use!
 
 As I mentioned earlier, the goal is to build a homelab that works as a playground for experimentation which means even your **grandma’s old laptop** will work too.
 
@@ -30,7 +30,7 @@ For me, that is an old [Sony VAIO VPCEH](https://vaiolibrary.com/VPCEH), Core i3
 
 ---
 
-# Ubuntu btw ?
+## Ubuntu btw ?
 
 ![Boomer Pants](ubuntubtw.jpg)
 
@@ -43,25 +43,24 @@ However, you can also go with the [Ubuntu Desktop](https://ubuntu.com/tutorials/
 
 ---
 
-# Laptop Heavy, Knees Weak, Arms Heavy
+## Reaching Cluster Nodes Remotely
 
-Ok, so the first issue I wanted to tackle is [SSH](https://en.wikipedia.org/wiki/Secure_Shell) access to my VAIO from my Macbook. I wanted to approach this properly, because this decision would set the foundation for the architecture
-I have in mind, using [VXLAN overlay](https://www.hpe.com/us/en/what-is/vxlan.html#explained) to **connect multiple devices across different networks as if they were on the same local network**.
+The first issue I wanted to tackle was [SSH](https://en.wikipedia.org/wiki/Secure_Shell) access to my VAIO from my Macbook. It’s very likely that I’ll be outside my local network at some point, and managing SSH access through authorized keys across multiple machines quickly becomes a hassle. I needed a solution that would enable **secure access without constantly juggling keys or reconfiguring SSH**.
 
-Additionally, it’s very likely that I’ll be outside my local network at some point, and managing SSH access through authorized keys across multiple machines quickly becomes a hassle. I needed a solution that would enable **secure access without constantly juggling keys or reconfiguring SSH**.
-
-While researching ways to achieve this, I came across the fantastic [Tailscale](https://tailscale.com/), and honestly I was amazed to what it had in store for this.
+While researching ways to achieve this, I came across the fantastic [Tailscale](https://tailscale.com/), and honestly I was amazed to what it had in store.
 
 ---
 
-# All This For Free
+## Tailscale
 
 ![Tailscale logo](tailscale.png)
 
 **Tailscale** creates secure, point-to-point connectivity between devices using [WireGuard](https://www.wireguard.com/), forming what’s known as a **tailnet**. That means I can connect from my MacBook to my VAIO over SSH completely privately and, most importantly, securely.
 
-Even better, the [personal](https://tailscale.com/pricing?plan=personal) tier is incredibly generous, incuding up to 100 devices and 3 users. Not to glaze over it, but the setup was _incredibly easy_, which is always something I love to praise when trying out a new product.
+Even better, the [personal](https://tailscale.com/pricing?plan=personal) tier is incredibly generous, including up to **100 devices and 3 users**. Not to glaze over it, but the setup was _incredibly easy_, which is always something I love to praise when trying out a new product.
 However, if you are more of FOSS person, I highly recommend checking the [Headscale Project](https://github.com/juanfont/headscale) as an option to self-host Tailscale's control server. **Headscale** implements a single tailnet being well suited for personal use.
+
+### Installing Tailscale
 
 To set up my MacBook, I simply downloaded the [Tailscale client](https://tailscale.com/download/mac) from the official site and continued from there.  
 For my VAIO running Linux, joining the mesh was as simple as running:
@@ -79,14 +78,32 @@ sudo tailscale up --ssh
 Importantly, here we pass the `--ssh` flag to activate [Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh).
 The idea here is ditch SSH login via password, and even SSH keys as there is a configuration overhead per machine added.
 
-This feature, since it eliminates SSH key management while maintaining security. Tailscale SSH encrypts the connection over **WireGuard** using **Tailscale node keys** that are automatically
+Tailscale SSH encrypts the connection over **WireGuard** using **Tailscale node keys** that are automatically
 generated and expire after each session. It even enforces authentication for high-risk connections (like root logins). Very neat!
 
-Just like that I can now connect from my Macbook to my VAIO via SSH privately and securely. There is one more thing to take care of to finish securing the machine.
+Just like that I can now connect from my Macbook to my VAIO via SSH privately and securely.
 
 ---
 
-# Raise the Wall
+### Adding MagicDNS + Tailscale SSH to Manage SSH Login
+
+While we could SSH simply using the convention **hostname@tailscale-ip**, that becomes quite hard to remember specially as we add more
+devices to the tailnet. Fortunately, we could make use of [MagicDNS](https://tailscale.com/kb/1081/magicdns) which allow us to automatically **register DNS
+names for devices in our network**, that way we can substitute our raw tailscale IP for a readable name.
+
+![Tailscale MagicDNS Update](magicdns.png)
+
+Now, I can access my machine with a much better convention over SSH and simply authenticate on Tailscale to achieve an encrypted connnection as follows:
+
+```bash
+ssh hostname@machine-name
+```
+
+Awesome, now there is one more thing to take care of to finish securing the machine.
+
+---
+
+### Raise the Wall
 
 We will do a few things to raise the wall. First, let's setup our **sshd_config** to only listen to its private IP
 defined in Tailscale.
@@ -126,38 +143,22 @@ sudo ufw enable
 
 ---
 
-# Adding MagicDNS + Tailscale SSH to Manage SSH Login
+## Wrapping up
 
-While we could SSH simply using the convention **hostname@tailscale-ip**, that becomes quite hard to remember specially as we add more
-devices to the tailnet. Fortunately, we could make use of [MagicDNS](https://tailscale.com/kb/1081/magicdns) which allow us to automatically **register DNS
-names for devices in our network**, that way we can substitute our raw tailscale IP for a readable name.
-
-![Tailscale MagicDNS Update](magicdns.png)
-
-Now, I can access my machine with a much better convention over SSH and simply authenticate on Tailscale to achieve an encrypted connnection as follows:
-
-```bash
-ssh hostname@machine-name
-```
-
----
-
-# Wrapping up
-
-That’s a solid start for **Kinho’s Homelab**! We took an old VAIO laptop that was gathering dust and gave it a new purpose as our first node. We **installed Ubuntu** (sorry Arch 😅), configured secure remote access with **Tailscale**, and locked it down properly with `ufw` and SSH hardening.
+That’s a solid start for **Kinho’s Homelab**! We took an old VAIO laptop that was gathering dust and gave it a new purpose as our first node. We **installed Ubuntu** (sorry Arch 😅), configured secure remote access with **Tailscale**, and locked it down properly with **ufw** and SSH hardening.
 
 I am also very excited to test out other features that Tailscale enables such as [serve](https://tailscale.com/kb/1312/serve) for **routing traffic from my devices
-to a local service** running on my tailnet, and also [funnels](https://tailscale.com/kb/1223/funnel) to **route traffic from the internet to a local service on my tailnet**.
+to a local service** running on my tailnet, and experiment with [funnels](https://tailscale.com/kb/1223/funnel) to **route traffic from the internet to a local service on my tailnet**.
 
 With the foundation in place, the next step will be our installation of **Kubernetes** to start experimenting and slowly build up services. There is still a lot of fun ahead, but we are off to a great start.
 
 ---
 
-# Next in Kinho's Homelab Series
+### Next in Kinho's Homelab Series
 
 **TBD**
 
-# Resources
+### Resources
 
 - [Ubuntu Server Installation](https://ubuntu.com/tutorials/install-ubuntu-server#1-overview)
 - [Tailscale](https://tailscale.com/)
